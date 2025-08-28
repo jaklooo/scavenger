@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "react-query";
 import { updateSubmission } from "@/services/submissions";
+import { updateTaskProgress } from "@/services/progress";
 import { useAuth } from "@/hooks/use-auth";
 import toast from "react-hot-toast";
 
@@ -13,6 +14,15 @@ export function useAdminUpdateSubmission() {
         throw new Error("Only admins can update submissions");
       }
       await updateSubmission(teamId, submissionId, updates);
+      // Ak admin schváli submission, nastav progress na "done"
+      if (updates.status === "approved") {
+        // submissionId je ID submissionu, potrebujeme taskId
+        // Získame submission z Firestore, alebo očakávame že updates obsahuje taskId
+        const taskId = updates.taskId || updates["taskId"];
+        if (taskId) {
+          await updateTaskProgress(teamId, taskId, "done");
+        }
+      }
     },
     {
       onSuccess: () => {
