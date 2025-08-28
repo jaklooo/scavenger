@@ -56,23 +56,6 @@ export function LandingPage() {
                 Team Login
               </Button>
               
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or</span>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={() => setActiveForm("admin")}
-                variant="secondary"
-                className="w-full h-10 text-sm bg-[#BB133A] hover:bg-[#9A0F2E] text-white"
-                size="lg"
-              >
-                🔑 Admin Access
-              </Button>
             </CardContent>
           </Card>
         )}
