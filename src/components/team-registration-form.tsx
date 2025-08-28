@@ -22,7 +22,20 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
   const [showTeamNamePrompt, setShowTeamNamePrompt] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamNameError, setTeamNameError] = useState<string | null>(null);
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
+  // Google sign up handler
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    try {
+      await signInWithGoogle();
+      // Po Google sign up presmeruj na team name prompt, ak je nový user
+      setShowTeamNamePrompt(true);
+    } catch (error: any) {
+      toast.error(error.message || "Google sign-in failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const router = useRouter();
 
   const handleInputChange = (field: "email" | "password") => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,37 +139,56 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        <Input
-          id="email"
-          type="email"
-          placeholder="Email address"
-          value={formData.email}
-          onChange={handleInputChange("email")}
-          autoComplete="email"
-          disabled={isLoading}
-        />
-        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+    <>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <Input
+            id="email"
+            type="email"
+            placeholder="Email address"
+            value={formData.email}
+            onChange={handleInputChange("email")}
+            autoComplete="email"
+            disabled={isLoading}
+          />
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
 
-        <Input
-          id="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleInputChange("password")}
-          autoComplete="new-password"
-          disabled={isLoading}
-        />
-        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+          <Input
+            id="password"
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleInputChange("password")}
+            autoComplete="new-password"
+            disabled={isLoading}
+          />
+          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+        </div>
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Registering..." : "Register"}
+        </Button>
+        <Button type="button" variant="ghost" className="w-full mt-2" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </form>
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
+        </div>
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Registering..." : "Register"}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={handleGoogleSignUp}
+        disabled={isLoading}
+      >
+        Continue with Google
       </Button>
-      <Button type="button" variant="ghost" className="w-full mt-2" onClick={onBack}>
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back
-      </Button>
-    </form>
+    </>
   );
 }
