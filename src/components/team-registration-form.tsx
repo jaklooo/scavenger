@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { TeamRegistrationSchema, type TeamRegistration } from "@/schemas";
 import { createTeam } from "@/services/teams";
+import { auth, db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { ArrowLeft } from "lucide-react";
 
@@ -65,6 +67,13 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
       
       // Then create team (now user is authenticated)
       const teamId = await createTeam(formData.teamName);
+      
+      // Update user with teamId
+      if (auth.currentUser) {
+        await setDoc(doc(db, "users", auth.currentUser.uid), {
+          teamId: teamId
+        }, { merge: true });
+      }
       
       toast.success("Team created successfully!");
       router.push("/dashboard");

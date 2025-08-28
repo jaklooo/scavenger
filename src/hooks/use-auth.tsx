@@ -103,15 +103,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update the user's display name
       await updateProfile(result.user, { displayName });
 
-      // Create user document in Firestore
+      // Create user document in Firestore  
       const isAdminEmail = ADMIN_EMAILS.includes(email);
-      const newUserData: User = {
+      const newUserData: Partial<User> = {
         displayName,
         email,
-        teamId,
         role: isAdminEmail ? "admin" : "team",
         createdAt: new Date(),
       };
+      
+      // Only add teamId if it's provided
+      if (teamId) {
+        newUserData.teamId = teamId;
+      }
 
       await setDoc(doc(db, "users", result.user.uid), {
         ...newUserData,
