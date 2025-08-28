@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if user belongs to a specific team
+    function belongsToTeam(teamId) {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+    }
+    
+    // Users collection - users can only read/write their own document
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && 
+                           (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Teams collection
+    match /teams/{teamId} {
+      // Team members can read their own team, admins can read all
+      allow read: if isAuthenticated() && (belongsToTeam(teamId) || isAdmin());
+      
+      // Only admins can write to teams
+      allow write: if isAdmin();
+    }
+    
+    // Tasks collection - readable by authenticated users, writable by admins
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Progress collection - team-specific access
+    match /progress/{teamId}/tasks/{taskId} {
+      // Team members can read/write their own progress, admins can read/write all
+      allow read, write: if isAuthenticated() && 
+                           (belongsToTeam(teamId) || isAdmin());
+    }
+    
+    // Submissions collection - team-specific access
+    match /submissions/{teamId}/{submissionId} {
+      // Team members can read/write their own submissions, admins can read/write all
+      allow read, write: if isAuthenticated() && 
+                           (belongsToTeam(teamId) || isAdmin());
+    }
+    
+    // Allow reading any document for authenticated users (needed for some queries)
+    // But still enforce team isolation in client code
+    match /{document=**} {
+      allow read: if false; // Explicitly deny catch-all read access
+      allow write: if false; // Explicitly deny catch-all write access
+    }
+  }
+}

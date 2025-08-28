@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if user belongs to a specific team
+    function belongsToTeam(teamId) {
+      return isAuthenticated() && 
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+    }
+    
+    // Team submissions - team members can only access their own team's files
+    match /teams/{teamId}/submissions/{fileName} {
+      // Team members can read/write their own team's submissions
+      // Admins can read/write all submissions
+      allow read, write: if isAuthenticated() && 
+                           (belongsToTeam(teamId) || isAdmin());
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
