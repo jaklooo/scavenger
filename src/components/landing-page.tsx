@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeamRegistrationForm } from "@/components/team-registration-form";
 import { TeamLoginForm } from "@/components/team-login-form";
+import { AdminLoginForm } from "@/components/admin-login-form";
 
 export function LandingPage() {
-  const [activeForm, setActiveForm] = useState<"none" | "register" | "login">("none");
+  const [activeForm, setActiveForm] = useState<"none" | "register" | "login" | "admin">("none");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex flex-col items-center justify-center p-4">
@@ -54,6 +55,24 @@ export function LandingPage() {
               >
                 Team Login
               </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or</span>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={() => setActiveForm("admin")}
+                variant="secondary"
+                className="w-full h-10 text-sm bg-[#BB133A] hover:bg-[#9A0F2E] text-white"
+                size="lg"
+              >
+                🔑 Admin Access
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -86,6 +105,11 @@ export function LandingPage() {
               <TeamLoginForm onBack={() => setActiveForm("none")} />
             </CardContent>
           </Card>
+        )}
+
+        {/* Admin Login Form */}
+        {activeForm === "admin" && (
+          <AdminLoginForm onBack={() => setActiveForm("none")} />
         )}
 
         {/* Footer */}
