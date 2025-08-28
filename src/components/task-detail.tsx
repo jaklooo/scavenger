@@ -279,10 +279,10 @@ export function TaskDetail({ task, onBack, status }: TaskDetailProps) {
                 <div key={submission.id} className="border rounded-xl p-4">
                   <div className="flex items-start space-x-3">
                     <div className="flex-1">
-                      {submission.downloadUrl ? (
+                      {submission.downloadURL ? (
                         submission.type === "image" ? (
                           <img
-                            src={submission.downloadUrl}
+                            src={submission.downloadURL}
                             alt="Submission"
                             className="w-full h-32 object-cover rounded-lg mb-2"
                           />
@@ -291,7 +291,7 @@ export function TaskDetail({ task, onBack, status }: TaskDetailProps) {
                             controls
                             className="w-full h-32 rounded-lg mb-2"
                           >
-                            <source src={submission.downloadUrl} />
+                            <source src={submission.downloadURL} />
                           </video>
                         )
                       ) : (

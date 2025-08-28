@@ -35,7 +35,7 @@ export function AdminLoginForm({ onBack }: AdminLoginFormProps) {
     setIsLoading(true);
     try {
       // Sign in with pre-created admin account  
-      await signIn("admin@fsvuk.local", "admin123456");
+      await signIn("admin@fsv-uk-scave.com", "fsv12345");
       toast.success("Admin login successful!");
       router.push("/admin");
     } catch (error: any) {
@@ -44,7 +44,7 @@ export function AdminLoginForm({ onBack }: AdminLoginFormProps) {
       // If admin account doesn't exist, create it
       if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
         try {
-          await signUp("admin@fsvuk.local", "admin123456", "Admin User");
+          await signUp("admin@fsv-uk-scave.com", "fsv12345", "Admin User");
           toast.success("Admin account created and logged in!");
           router.push("/admin");
         } catch (createError: any) {

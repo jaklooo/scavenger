@@ -41,12 +41,18 @@ export type Progress = z.infer<typeof ProgressSchema>;
 
 // Submission schemas
 export const SubmissionSchema = z.object({
+  id: z.string().optional(),
   taskId: z.string(),
   type: z.enum(["image", "video"]),
   storagePath: z.string(),
+  downloadURL: z.string().optional(),
   caption: z.string().optional(),
   createdAt: z.date(),
   approved: z.boolean().optional(),
+  status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+  submittedAt: z.any().optional(), // Timestamp from Firebase
+  points: z.number().optional(),
+  rejectionReason: z.string().optional(),
 });
 
 export type Submission = z.infer<typeof SubmissionSchema>;

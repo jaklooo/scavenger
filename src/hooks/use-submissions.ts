@@ -2,8 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { 
-  getTeamSubmissions, 
-  getTaskSubmissions, 
+  getSubmissionsByTeam, 
   createSubmission, 
   deleteSubmission 
 } from "@/services/submissions";
@@ -14,13 +13,13 @@ import toast from "react-hot-toast";
 export function useTeamSubmissions() {
   const { userData } = useAuth();
   
-  return useQuery<Array<Submission & { id: string; downloadUrl?: string }>>(
+  return useQuery<Submission[]>(
     ["submissions", userData?.teamId],
     () => {
       if (!userData?.teamId) {
         throw new Error("No team ID");
       }
-      return getTeamSubmissions(userData.teamId);
+      return getSubmissionsByTeam(userData.teamId);
     },
     {
       enabled: !!userData?.teamId,
@@ -32,13 +31,14 @@ export function useTeamSubmissions() {
 export function useTaskSubmissions(taskId: string) {
   const { userData } = useAuth();
   
-  return useQuery<Array<Submission & { id: string; downloadUrl?: string }>>(
+  return useQuery<Submission[]>(
     ["submissions", userData?.teamId, taskId],
-    () => {
+    async () => {
       if (!userData?.teamId) {
         throw new Error("No team ID");
       }
-      return getTaskSubmissions(userData.teamId, taskId);
+      const allSubmissions = await getSubmissionsByTeam(userData.teamId);
+      return allSubmissions.filter(submission => submission.taskId === taskId);
     },
     {
       enabled: !!userData?.teamId && !!taskId,

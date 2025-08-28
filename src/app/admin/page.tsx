@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AdminPage } from "@/components/admin-page";
+import AdminPage from "@/components/admin-page";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function Admin() {

@@ -56,17 +56,17 @@ export function GalleryPage() {
                 className="aspect-square relative cursor-pointer group"
                 onClick={() => setSelectedMedia(submission)}
               >
-                {submission.downloadUrl ? (
+                {submission.downloadURL ? (
                   submission.type === "image" ? (
                     <img
-                      src={submission.downloadUrl}
+                      src={submission.downloadURL}
                       alt={submission.caption || "Team submission"}
                       className="w-full h-full object-cover rounded-xl"
                     />
                   ) : (
                     <div className="w-full h-full bg-black rounded-xl flex items-center justify-center relative">
                       <video
-                        src={submission.downloadUrl}
+                        src={submission.downloadURL}
                         className="w-full h-full object-cover rounded-xl"
                         muted
                       />
