@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { TeamRegistrationSchema, type TeamRegistration } from "@/schemas";
-import { createTeam } from "@/services/teams";
+import { z } from "zod";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
@@ -17,37 +16,33 @@ interface TeamRegistrationFormProps {
 }
 
 export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
-  const [formData, setFormData] = useState<TeamRegistration>({
-    teamName: "",
-    displayName: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<TeamRegistration>>({});
-  
-  const { signUp, signInWithGoogle } = useAuth();
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showTeamNamePrompt, setShowTeamNamePrompt] = useState(false);
+  const [teamName, setTeamName] = useState("");
+  const [teamNameError, setTeamNameError] = useState<string | null>(null);
+  const { signUp } = useAuth();
   const router = useRouter();
 
-  const handleInputChange = (field: keyof TeamRegistration) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleInputChange = (field: "email" | "password") => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
   };
 
   const validateForm = (): boolean => {
+    const schema = z.object({
+      email: z.string().email("Invalid email address"),
+      password: z.string().min(6, "Password must be at least 6 characters"),
+    });
     try {
-      TeamRegistrationSchema.parse(formData);
+      schema.parse(formData);
       setErrors({});
       return true;
     } catch (error: any) {
-      const fieldErrors: Partial<TeamRegistration> = {};
+      const fieldErrors: { email?: string; password?: string } = {};
       error.errors?.forEach((err: any) => {
-        const field = err.path[0] as keyof TeamRegistration;
+        const field = err.path[0] as "email" | "password";
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -57,167 +52,111 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-
     setIsLoading(true);
     try {
-      // Create user account FIRST
-      await signUp(formData.email, formData.password, formData.displayName);
-      
-      // Then create team (now user is authenticated)
-      const teamId = await createTeam(formData.teamName);
-      
-      // Update user with teamId
-      if (auth.currentUser) {
-        await setDoc(doc(db, "users", auth.currentUser.uid), {
-          teamId: teamId
-        }, { merge: true });
-      }
-      
-      toast.success("Team created successfully!");
+      await signUp(formData.email, formData.password, "");
+      setShowTeamNamePrompt(true);
+    } catch (error: any) {
+      toast.error(error.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTeamNameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!teamName.trim()) {
+      setTeamNameError("Team name is required");
+      return;
+    }
+    if (teamName.length > 50) {
+      setTeamNameError("Team name must be less than 50 characters");
+      return;
+    }
+    setTeamNameError(null);
+    setIsLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("User not found");
+      const teamRef = doc(db, "teams", user.uid);
+      await setDoc(teamRef, {
+        name: teamName,
+        createdAt: new Date(),
+        memberCount: 1,
+      });
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        teamId: user.uid,
+        teamName: teamName,
+      }, { merge: true });
+      toast.success("Team name set successfully!");
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Registration error:", error);
-      toast.error(error.message || "Failed to create team");
+      toast.error(error.message || "Failed to set team name");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    try {
-      setIsLoading(true);
-      await signInWithGoogle();
-      router.push("/dashboard");
-    } catch (error) {
-      // Error is handled in the hook
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <Button
-        onClick={onBack}
-        variant="ghost"
-        size="sm"
-        className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to options
-      </Button>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+  if (showTeamNamePrompt) {
+    return (
+      <form onSubmit={handleTeamNameSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label htmlFor="teamName" className="text-sm font-medium text-foreground">
-            Team Name
-          </label>
+          <label htmlFor="teamName" className="font-medium">Team Name</label>
           <Input
             id="teamName"
             type="text"
             placeholder="Enter your team name"
-            value={formData.teamName}
-            onChange={handleInputChange("teamName")}
-            className={errors.teamName ? "border-red-500" : ""}
-            aria-describedby={errors.teamName ? "teamName-error" : undefined}
+            value={teamName}
+            onChange={e => setTeamName(e.target.value)}
+            maxLength={50}
+            disabled={isLoading}
           />
-          {errors.teamName && (
-            <p id="teamName-error" className="text-sm text-red-500">
-              {errors.teamName}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            <span className="text-red-500 font-semibold">Warning:</span> This team name cannot be changed later.
+          </p>
+          {teamNameError && <p className="text-red-500 text-xs mt-1">{teamNameError}</p>}
         </div>
-
-        <div className="space-y-2">
-          <label htmlFor="displayName" className="text-sm font-medium text-foreground">
-            Your Name
-          </label>
-          <Input
-            id="displayName"
-            type="text"
-            placeholder="Enter your display name"
-            value={formData.displayName}
-            onChange={handleInputChange("displayName")}
-            className={errors.displayName ? "border-red-500" : ""}
-            aria-describedby={errors.displayName ? "displayName-error" : undefined}
-          />
-          {errors.displayName && (
-            <p id="displayName-error" className="text-sm text-red-500">
-              {errors.displayName}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
-            Email Address
-          </label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleInputChange("email")}
-            className={errors.email ? "border-red-500" : ""}
-            aria-describedby={errors.email ? "email-error" : undefined}
-          />
-          {errors.email && (
-            <p id="email-error" className="text-sm text-red-500">
-              {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-foreground">
-            Password
-          </label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Create a password"
-            value={formData.password}
-            onChange={handleInputChange("password")}
-            className={errors.password ? "border-red-500" : ""}
-            aria-describedby={errors.password ? "password-error" : undefined}
-          />
-          {errors.password && (
-            <p id="password-error" className="text-sm text-red-500">
-              {errors.password}
-            </p>
-          )}
-        </div>
-
-        <Button 
-          type="submit" 
-          className="w-full" 
-          disabled={isLoading}
-          size="lg"
-        >
-          {isLoading ? "Creating Team..." : "Create Team"}
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Saving..." : "Set Team Name"}
         </Button>
       </form>
+    );
+  }
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
-        </div>
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <Input
+          id="email"
+          type="email"
+          placeholder="Email address"
+          value={formData.email}
+          onChange={handleInputChange("email")}
+          autoComplete="email"
+          disabled={isLoading}
+        />
+        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+
+        <Input
+          id="password"
+          type="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleInputChange("password")}
+          autoComplete="new-password"
+          disabled={isLoading}
+        />
+        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
       </div>
-
-      <Button
-        onClick={handleGoogleSignUp}
-        variant="outline"
-        className="w-full"
-        disabled={isLoading}
-        size="lg"
-      >
-        Continue with Google
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Registering..." : "Register"}
       </Button>
-    </div>
+      <Button type="button" variant="ghost" className="w-full mt-2" onClick={onBack}>
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+    </form>
   );
 }
