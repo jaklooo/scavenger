@@ -513,7 +513,7 @@ function SubmissionCard({ submission, isPending }: { submission: any, isPending:
     adminUpdate.mutate({
       teamId: submission.teamId,
       submissionId: submission.id,
-      updates: { status: "approved", approved: true, points: points },
+      updates: { status: "approved", approved: true, points: points, taskId: submission.taskId },
     });
   };
   const handleReject = () => {
