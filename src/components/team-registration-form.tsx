@@ -68,7 +68,8 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      await signUp(formData.email, formData.password, "");
+      // Always set displayName to email for initial user creation (required by schema)
+      await signUp(formData.email, formData.password, formData.email);
       setShowTeamNamePrompt(true);
     } catch (error: any) {
       toast.error(error.message || "Registration failed");
@@ -102,7 +103,12 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
       await setDoc(userRef, {
         teamId: user.uid,
         teamName: teamName,
+        displayName: teamName, // always set displayName for schema
       }, { merge: true });
+      // Optionally update Firebase Auth profile too
+      if (user.displayName !== teamName) {
+        await user.updateProfile?.({ displayName: teamName });
+      }
       toast.success("Team name set successfully!");
       router.push("/dashboard");
     } catch (error: any) {
