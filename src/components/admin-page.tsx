@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+// ...existing code...
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "react-query";
 import { getTeamsProgress, getAllSubmissionsForAdmin } from "@/services/submissions";
+import { useAdminUpdateSubmission } from "@/hooks/use-admin-update-submission";
 import { useRouter } from "next/navigation";
 import { Search, Users, TrendingUp, Home, FileText, Trophy, Camera, CheckCircle, Clock, Eye, Download, Calendar } from "lucide-react";
 
@@ -501,7 +502,40 @@ function SubmissionsManagement({ submissions, loading }: { submissions: any[], l
 }
 
 // Submission Card Component
+import { useState } from "react";
 function SubmissionCard({ submission, isPending }: { submission: any, isPending: boolean }) {
+  const adminUpdate = useAdminUpdateSubmission();
+  const [points, setPoints] = useState(submission.points || 0);
+  const [pointsEdit, setPointsEdit] = useState(false);
+  const [pointsInput, setPointsInput] = useState(points.toString());
+
+  const handleApprove = () => {
+    adminUpdate.mutate({
+      teamId: submission.teamId,
+      submissionId: submission.id,
+      updates: { status: "approved", approved: true, points: points },
+    });
+  };
+  const handleReject = () => {
+    adminUpdate.mutate({
+      teamId: submission.teamId,
+      submissionId: submission.id,
+      updates: { status: "rejected", approved: false },
+    });
+  };
+  const handlePointsSave = () => {
+    const val = parseInt(pointsInput, 10);
+    if (!isNaN(val)) {
+      setPoints(val);
+      adminUpdate.mutate({
+        teamId: submission.teamId,
+        submissionId: submission.id,
+        updates: { points: val },
+      });
+      setPointsEdit(false);
+    }
+  };
+
   return (
     <Card className={`overflow-hidden ${isPending ? 'border-orange-200 bg-orange-50' : ''}`}>
       <div className="aspect-video bg-gray-100 relative">
@@ -528,9 +562,23 @@ function SubmissionCard({ submission, isPending }: { submission: any, isPending:
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h4 className="font-semibold text-sm text-[#BB133A]">{submission.teamName}</h4>
-          {submission.points && (
-            <span className="text-sm font-bold text-green-600">{submission.points} pts</span>
-          )}
+          <div className="flex items-center space-x-2">
+            {pointsEdit ? (
+              <>
+                <input
+                  type="number"
+                  value={pointsInput}
+                  onChange={e => setPointsInput(e.target.value)}
+                  className="w-16 border rounded px-1 text-sm"
+                  min={0}
+                />
+                <Button size="sm" onClick={handlePointsSave} className="px-2 py-1 text-xs">Save</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setPointsEdit(false); setPointsInput(points.toString()); }} className="px-2 py-1 text-xs">Cancel</Button>
+              </>
+            ) : (
+              <span className="text-sm font-bold text-green-600 cursor-pointer" onClick={() => setPointsEdit(true)} title="Edit points">{points} pts</span>
+            )}
+          </div>
         </div>
         <p className="text-sm text-gray-600 mb-3">{submission.caption}</p>
         <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
@@ -539,14 +587,13 @@ function SubmissionCard({ submission, isPending }: { submission: any, isPending:
             {submission.submittedAt?.toDate?.()?.toLocaleDateString()}
           </span>
         </div>
-        
         {isPending && (
           <div className="flex space-x-2">
-            <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+            <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={handleApprove} disabled={adminUpdate.isLoading}>
               <CheckCircle className="w-3 h-3 mr-1" />
               Approve
             </Button>
-            <Button size="sm" variant="outline" className="flex-1 text-red-600 border-red-600 hover:bg-red-50">
+            <Button size="sm" variant="outline" className="flex-1 text-red-600 border-red-600 hover:bg-red-50" onClick={handleReject} disabled={adminUpdate.isLoading}>
               Reject
             </Button>
           </div>

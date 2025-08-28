@@ -19,8 +19,14 @@ service firebase.storage {
              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.teamId == teamId;
     }
     
-    // Team submissions - team members can only access their own team's files
+    // Team submissions (old path)
     match /teams/{teamId}/submissions/{fileName} {
+      allow read, write: if isAuthenticated() && 
+                           (belongsToTeam(teamId) || isAdmin());
+    }
+
+    // Submissions (new path used by app): submissions/{teamId}/{allPaths=**}
+    match /submissions/{teamId}/{allPaths=**} {
       // Team members can read/write their own team's submissions
       // Admins can read/write all submissions
       allow read, write: if isAuthenticated() && 
