@@ -1,0 +1,19 @@
+{"users": [
+{
+  "localId": "Rx5unKowPDYLYYQeOqcgELmN19F2",
+  "email": "50808925@fsv.cuni.cz",
+  "emailVerified": true,
+  "displayName": "Marek Jaklovský",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocLMc5u8Hegce6awFzRU0ojCPpHhA4gRn3UPnEz3qP8dLiE2oA=s96-c",
+  "lastSignedInAt": "1756397532396",
+  "createdAt": "1756397532396",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "102514210415917305959",
+      "email": "50808925@fsv.cuni.cz",
+      "displayName": "Marek Jaklovský",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocLMc5u8Hegce6awFzRU0ojCPpHhA4gRn3UPnEz3qP8dLiE2oA=s96-c"
+    }
+  ]
+}]}

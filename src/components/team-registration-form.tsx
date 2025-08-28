@@ -60,11 +60,11 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
 
     setIsLoading(true);
     try {
-      // Create team first
-      const teamId = await createTeam(formData.teamName);
+      // Create user account FIRST
+      await signUp(formData.email, formData.password, formData.displayName);
       
-      // Create user account with team ID
-      await signUp(formData.email, formData.password, formData.displayName, teamId);
+      // Then create team (now user is authenticated)
+      const teamId = await createTeam(formData.teamName);
       
       toast.success("Team created successfully!");
       router.push("/dashboard");
