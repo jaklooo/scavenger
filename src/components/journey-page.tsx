@@ -66,25 +66,29 @@ export function JourneyPage() {
 
   if (showIntro) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/95">
-        <div className="max-w-lg w-full bg-white rounded-2xl shadow-2xl p-8 text-center border-4 border-primary relative animate-fade-in">
-          <div className="mb-4">
-            <span className="inline-block bg-primary text-white rounded-full p-3 mb-2">
-              <Trophy className="w-8 h-8" />
-            </span>
-            <h2 className="text-3xl font-extrabold mb-2 text-primary font-serif tracking-tight">Welcome, brave adventurers!</h2>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/95 overflow-y-auto">
+        <div className="max-w-lg w-full bg-white rounded-2xl shadow-2xl border-4 border-primary relative animate-fade-in h-full max-h-screen flex flex-col justify-center p-0 sm:p-8">
+          <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 overflow-y-auto">
+            <div className="mb-4">
+              <span className="inline-block bg-primary text-white rounded-full p-3 mb-2">
+                <Trophy className="w-8 h-8" />
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 text-primary font-serif tracking-tight">Welcome, brave adventurers!</h2>
+            </div>
+            <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 font-medium">
+              You’ve entered the legendary world of Charles University, where knowledge is power, food is survival, and trams are always late. It is a place where history, knowledge, and student life have intertwined for nearly 700 years. But rumours speak of a hidden legacy, the path walked by the very first international students of Prague, long forgotten.<br /><br />
+              Long ago, the First International Student left behind a Student Survival Map, a guide to thriving in Prague. However, the map was divided into pieces, scattered across the city. Only by solving riddles, working together, and facing the busy tourist-filled streets can you put it back together.
+            </p>
           </div>
-          <p className="text-gray-700 text-lg leading-relaxed mb-6 font-medium">
-            You’ve entered the legendary world of Charles University, where knowledge is power, food is survival, and trams are always late. It is a place where history, knowledge, and student life have intertwined for nearly 700 years. But rumours speak of a hidden legacy, the path walked by the very first international students of Prague, long forgotten.<br /><br />
-            Long ago, the First International Student left behind a Student Survival Map, a guide to thriving in Prague. However, the map was divided into pieces, scattered across the city. Only by solving riddles, working together, and facing the busy tourist-filled streets can you put it back together.
-          </p>
-          <Button
-            className="w-full py-3 text-lg font-bold bg-primary hover:bg-primary-800 text-white rounded-xl shadow-lg transition"
-            onClick={handleIntroContinue}
-            disabled={introLoading}
-          >
-            Continue
-          </Button>
+          <div className="p-4 sm:p-8 border-t border-primary/10 bg-white">
+            <Button
+              className="w-full py-3 text-lg font-bold bg-primary hover:bg-primary-800 text-white rounded-xl shadow-lg transition"
+              onClick={handleIntroContinue}
+              disabled={introLoading}
+            >
+              Continue
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -119,6 +123,19 @@ export function JourneyPage() {
     }
   };
 
+  const handleContinueToNext = () => {
+    if (!tasks || !selectedTaskId) return;
+    const currentIndex = tasks.findIndex(t => t.id === selectedTaskId);
+    if (currentIndex === -1) return;
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < tasks.length) {
+      setSelectedTaskId(tasks[nextIndex].id);
+    } else {
+      // All tasks completed, go back to journey overview
+      setSelectedTaskId(null);
+    }
+  };
+
   if (selectedTaskId) {
     const task = tasks?.find(t => t.id === selectedTaskId);
     if (!task) {
@@ -130,6 +147,7 @@ export function JourneyPage() {
       <TaskDetail 
         task={task} 
         onBack={() => setSelectedTaskId(null)}
+        onContinue={handleContinueToNext}
         status={getTaskStatus(selectedTaskId)}
       />
     );
@@ -147,9 +165,16 @@ export function JourneyPage() {
   let nextTask: Task | undefined;
   let nextTaskIndex = -1;
   if (tasks && tasks.length > 0) {
-    nextTaskIndex = tasks.findIndex(task => getTaskStatus(task.id) !== "done");
+    // Najprv hľadáme prvú úlohu so statusom "todo"
+    nextTaskIndex = tasks.findIndex(task => getTaskStatus(task.id) === "todo");
     if (nextTaskIndex !== -1) {
       nextTask = tasks[nextTaskIndex];
+    } else {
+      // Ak nie sú žiadne "todo" úlohy, hľadáme prvú "in_review" úlohu
+      nextTaskIndex = tasks.findIndex(task => getTaskStatus(task.id) === "in_review");
+      if (nextTaskIndex !== -1) {
+        nextTask = tasks[nextTaskIndex];
+      }
     }
   }
 

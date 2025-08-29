@@ -11,6 +11,7 @@ import { getTeamsProgress, getAllSubmissionsForAdmin } from "@/services/submissi
 import { useAdminUpdateSubmission } from "@/hooks/use-admin-update-submission";
 import { useRouter } from "next/navigation";
 import { Search, Users, TrendingUp, Home, FileText, Trophy, Camera, CheckCircle, Clock, Eye, Download, Calendar } from "lucide-react";
+import Image from "next/image";
 
 export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -223,6 +224,21 @@ function TeamsManagement({
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
+                  {/* Profile Photo */}
+                  {team.profilePhoto ? (
+                    <Image
+                      src={team.profilePhoto}
+                      alt={`${team.teamName} profile`}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-[#BB133A]"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
+                      <Users className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">{team.teamName}</h3>
                     <p className="text-sm text-gray-500">
@@ -317,6 +333,44 @@ function TeamDetail({ team, onBack }: { team: any, onBack: () => void }) {
         </div>
       </div>
 
+      {/* Team Profile Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Team Profile</CardTitle>
+          <CardDescription>Team information and profile details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start space-x-6">
+            {/* Profile Photo */}
+            <div className="flex-shrink-0">
+              {team.profilePhoto ? (
+                <Image
+                  src={team.profilePhoto}
+                  alt={`${team.teamName} profile`}
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 rounded-full object-cover border-4 border-[#BB133A]"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-4 border-gray-300">
+                  <Users className="w-12 h-12 text-gray-400" />
+                </div>
+              )}
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{team.teamName}</h3>
+              {team.description ? (
+                <p className="text-gray-600 leading-relaxed">{team.description}</p>
+              ) : (
+                <p className="text-gray-400 italic">No description provided</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Team Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
@@ -363,9 +417,11 @@ function TeamDetail({ team, onBack }: { team: any, onBack: () => void }) {
                 <Card key={submission.id} className="overflow-hidden">
                   <div className="aspect-video bg-gray-100 relative">
                     {submission.type === 'image' ? (
-                      <img 
-                        src={submission.downloadURL} 
+                      <Image
+                        src={submission.downloadURL}
                         alt={submission.caption}
+                        width={400}
+                        height={225}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -540,9 +596,11 @@ function SubmissionCard({ submission, isPending }: { submission: any, isPending:
     <Card className={`overflow-hidden ${isPending ? 'border-orange-200 bg-orange-50' : ''}`}>
       <div className="aspect-video bg-gray-100 relative">
         {submission.type === 'image' ? (
-          <img 
-            src={submission.downloadURL} 
+          <Image
+            src={submission.downloadURL}
             alt={submission.caption}
+            width={400}
+            height={225}
             className="w-full h-full object-cover"
           />
         ) : (

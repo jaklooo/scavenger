@@ -18,6 +18,8 @@ export const TeamSchema = z.object({
   createdAt: z.date(),
   memberCount: z.number().min(1).optional(),
   introductionSeen: z.boolean().optional(),
+  profilePhoto: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export type Team = z.infer<typeof TeamSchema>;

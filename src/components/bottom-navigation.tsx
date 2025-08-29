@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { 
   Home, 
   Map, 
-  Camera 
+  Camera,
+  User
 } from "lucide-react";
 
 const navigationItems = [
@@ -24,6 +25,11 @@ const navigationItems = [
     name: "Gallery",
     href: "/gallery",
     icon: Camera,
+  },
+  {
+    name: "Profile",
+    href: "/profile",
+    icon: User,
   },
 ];
 

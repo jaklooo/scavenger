@@ -30,6 +30,8 @@ export interface TeamProgress {
   totalPoints: number;
   lastActivity: any;
   submissions: Submission[];
+  profilePhoto?: string;
+  description?: string;
 }
 
 export async function createSubmission(
@@ -228,7 +230,9 @@ export async function getTeamsProgress(): Promise<TeamProgress[]> {
         approvedSubmissions,
         totalPoints,
         lastActivity,
-        submissions: teamSubmissions
+        submissions: teamSubmissions,
+        profilePhoto: teamData.profilePhoto,
+        description: teamData.description
       });
     }
     
