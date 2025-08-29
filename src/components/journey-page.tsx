@@ -73,13 +73,30 @@ export function JourneyPage() {
     );
   }
 
+  // Nájdeme prvú nesplnenú úlohu (status !== "done")
+  type Task = {
+    title: string;
+    description: string;
+    points: number;
+    order: number;
+    active: boolean;
+    id: string;
+  };
+  let nextTask: Task | undefined;
+  let nextTaskIndex = -1;
+  if (tasks && tasks.length > 0) {
+    nextTaskIndex = tasks.findIndex(task => getTaskStatus(task.id) !== "done");
+    if (nextTaskIndex !== -1) {
+      nextTask = tasks[nextTaskIndex];
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-primary text-white p-6">
         <div className="max-w-lg mx-auto">
           <h1 className="text-2xl font-bold mb-4">Our Journey</h1>
-          
           {/* Progress Overview */}
           <div className="space-y-4">
             <Progress 
@@ -87,7 +104,6 @@ export function JourneyPage() {
               max={totalTasks} 
               className="bg-primary-800"
             />
-            
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold">{completedTasks}</div>
@@ -106,7 +122,7 @@ export function JourneyPage() {
         </div>
       </div>
 
-      {/* Tasks List */}
+      {/* Tasks List - zobraz len jednu aktívnu úlohu */}
       <div className="max-w-lg mx-auto p-6 space-y-4">
         {tasks?.length === 0 ? (
           <Card>
@@ -117,30 +133,29 @@ export function JourneyPage() {
               </p>
             </CardContent>
           </Card>
-        ) : (
-          tasks?.map((task, index) => {
-            const status = getTaskStatus(task.id);
+        ) : nextTask ? (
+          (() => {
+            const status = getTaskStatus(nextTask!.id);
             const Icon = getTaskIcon(status);
-            
             return (
               <Card 
-                key={task.id}
+                key={nextTask!.id}
                 className={cn(
                   "cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20",
                   status === "done" && "bg-green-50 border-green-200",
                   status === "in_review" && "bg-yellow-50 border-yellow-200"
                 )}
-                onClick={() => setSelectedTaskId(task.id)}
+                onClick={() => setSelectedTaskId(nextTask!.id)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                        {index + 1}
+                        {nextTaskIndex + 1}
                       </div>
                       <div className="flex-1">
                         <CardTitle className="text-lg leading-tight">
-                          {task.title}
+                          {nextTask!.title}
                         </CardTitle>
                         <div className="flex items-center space-x-2 mt-1">
                           <Badge variant={getTaskBadgeVariant(status)}>
@@ -148,24 +163,32 @@ export function JourneyPage() {
                             {status.replace("_", " ")}
                           </Badge>
                           <span className="text-sm text-muted-foreground">
-                            {task.points} pts
+                            {nextTask!.points} pts
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
-                
-                {task.description && (
+                {nextTask!.description && (
                   <CardContent className="pt-0">
                     <CardDescription className="line-clamp-2">
-                      {task.description}
+                      {nextTask!.description}
                     </CardDescription>
                   </CardContent>
                 )}
               </Card>
             );
-          })
+          })()
+        ) : (
+          <Card>
+            <CardContent className="text-center py-8">
+              <Trophy className="w-12 h-12 mx-auto text-green-400 mb-4" />
+              <p className="text-green-700 font-semibold">
+                Congratulations! All tasks are completed.
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
 
