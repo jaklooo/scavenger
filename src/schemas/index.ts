@@ -12,10 +12,12 @@ export const UserSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 
 // Team schemas
+
 export const TeamSchema = z.object({
   name: z.string().min(1, "Team name is required").max(50, "Team name must be less than 50 characters"),
   createdAt: z.date(),
   memberCount: z.number().min(1).optional(),
+  introductionSeen: z.boolean().optional(),
 });
 
 export type Team = z.infer<typeof TeamSchema>;

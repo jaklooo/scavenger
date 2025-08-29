@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,21 +9,83 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TaskDetail } from "@/components/task-detail";
 import { useTasks, useTeamProgress } from "@/hooks/use-tasks";
+import { useAuth } from "@/hooks/use-auth";
+import { updateTeam } from "@/services/teams";
 import { ArrowLeft, Trophy, Clock, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
 export function JourneyPage() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  
+  const [showIntro, setShowIntro] = useState(false);
+  const [introLoading, setIntroLoading] = useState(true);
+
   const { data: tasks, isLoading: tasksLoading } = useTasks();
   const { data: progress, isLoading: progressLoading } = useTeamProgress();
+  const { userData } = useAuth();
 
-  const isLoading = tasksLoading || progressLoading;
+  useEffect(() => {
+    let ignore = false;
+    const checkIntro = async () => {
+      if (!userData?.teamId) {
+        if (!ignore) setIntroLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/teams/${userData.teamId}`);
+        const team = await res.json();
+        if (!ignore) setShowIntro(!(team && team.introductionSeen));
+      } catch {
+        if (!ignore) setShowIntro(true);
+      } finally {
+        if (!ignore) setIntroLoading(false);
+      }
+    };
+    checkIntro();
+    return () => { ignore = true; };
+  }, [userData?.teamId]);
+
+  const isLoading = tasksLoading || progressLoading || introLoading;
+
+  const handleIntroContinue = async () => {
+    setIntroLoading(true);
+    if (userData?.teamId) {
+      await updateTeam(userData.teamId, { introductionSeen: true });
+    }
+    setShowIntro(false);
+    setIntroLoading(false);
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (showIntro) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/95">
+        <div className="max-w-lg w-full bg-white rounded-2xl shadow-2xl p-8 text-center border-4 border-primary relative animate-fade-in">
+          <div className="mb-4">
+            <span className="inline-block bg-primary text-white rounded-full p-3 mb-2">
+              <Trophy className="w-8 h-8" />
+            </span>
+            <h2 className="text-3xl font-extrabold mb-2 text-primary font-serif tracking-tight">Welcome, brave adventurers!</h2>
+          </div>
+          <p className="text-gray-700 text-lg leading-relaxed mb-6 font-medium">
+            You’ve entered the legendary world of Charles University, where knowledge is power, food is survival, and trams are always late. It is a place where history, knowledge, and student life have intertwined for nearly 700 years. But rumours speak of a hidden legacy, the path walked by the very first international students of Prague, long forgotten.<br /><br />
+            Long ago, the First International Student left behind a Student Survival Map, a guide to thriving in Prague. However, the map was divided into pieces, scattered across the city. Only by solving riddles, working together, and facing the busy tourist-filled streets can you put it back together.
+          </p>
+          <Button
+            className="w-full py-3 text-lg font-bold bg-primary hover:bg-primary-800 text-white rounded-xl shadow-lg transition"
+            onClick={handleIntroContinue}
+            disabled={introLoading}
+          >
+            Continue
+          </Button>
+        </div>
       </div>
     );
   }

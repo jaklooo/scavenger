@@ -20,6 +20,7 @@ export async function createTeam(name: string): Promise<string> {
       name,
       createdAt: new Date(),
       memberCount: 1,
+      introductionSeen: false,
     };
 
     // Validate team data
@@ -28,6 +29,7 @@ export async function createTeam(name: string): Promise<string> {
     const docRef = await addDoc(collection(db, "teams"), {
       ...teamData,
       createdAt: Timestamp.now(),
+      introductionSeen: false,
     });
 
     return docRef.id;
