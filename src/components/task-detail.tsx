@@ -31,6 +31,9 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
   const [caption, setCaption] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [answer, setAnswer] = useState("");
+  const [answerCorrect, setAnswerCorrect] = useState(false);
+  const [checkingAnswer, setCheckingAnswer] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: submissions, isLoading: submissionsLoading } = useTaskSubmissions(task.id);
@@ -82,7 +85,39 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
 
   const canSubmit = status === "todo" || (status === "in_review" && !justSubmitted);
   const isCompleted = status === "done";
+
+  // Helper: normalize text (remove diacritics, uppercase, trim)
+  const normalizeText = (s: string) => {
+    return s
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
+
+  // Identify if this is the first task (by order or id)
   const isFirstTask = task.order === 1 || task.id === "1";
+
+  // Parse validation type
+  let validationType: "text:contains" | "text:equals" | "photo" | "manual" | "gps" | "none" = "none";
+  let validationValue = "";
+  if (task.validation) {
+    if (task.validation.startsWith("text:contains:")) {
+      validationType = "text:contains";
+      validationValue = task.validation.replace("text:contains:", "");
+    } else if (task.validation.startsWith("text:equals:")) {
+      validationType = "text:equals";
+      validationValue = task.validation.replace("text:equals:", "");
+    } else if (task.validation === "photo") {
+      validationType = "photo";
+    } else if (task.validation === "manual") {
+      validationType = "manual";
+    } else if (task.validation === "gps") {
+      validationType = "gps";
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,67 +166,109 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
           </CardContent>
         </Card>
 
-        {canSubmit && (!isFirstTask || arrived) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Submit Your Work</CardTitle>
-              <CardDescription>Upload an image or video to complete this task</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
-
-                {!selectedFile ? (
-                  <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full h-24 border-2 border-dashed">
-                    <div className="text-center">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Click to select file</p>
-                    </div>
+        {canSubmit && (
+          validationType === "text:contains" || validationType === "text:equals" ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Submit Your Answer</CardTitle>
+                <CardDescription>Type your answer below and check if it matches the task requirements.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input placeholder="Type your answer here" value={answer} onChange={(e) => setAnswer(e.target.value)} aria-label="Answer input" />
+                <div className="flex items-center space-x-2">
+                  <Button onClick={async () => {
+                    const val = answer.trim();
+                    if (!val) {
+                      toast.error("Please enter an answer");
+                      return;
+                    }
+                    setCheckingAnswer(true);
+                    try {
+                      const normAnswer = normalizeText(val);
+                      const normExpected = normalizeText(validationValue);
+                      let ok = false;
+                      if (validationType === "text:contains") ok = normAnswer.includes(normExpected);
+                      else if (validationType === "text:equals") ok = normAnswer === normExpected;
+                      if (ok) {
+                        await updateProgressMutation.mutateAsync({ taskId: task.id, status: "done" });
+                        setAnswerCorrect(true);
+                        toast.success("Correct — task completed!");
+                      } else {
+                        toast.error("Incorrect answer, try again");
+                      }
+                    } catch (e) {
+                      // handled
+                    } finally {
+                      setCheckingAnswer(false);
+                    }
+                  }} disabled={checkingAnswer}>
+                    {checkingAnswer ? <LoadingSpinner size="sm" className="mr-2" /> : "Check Answer"}
                   </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="relative">
-                      {selectedFile.type.startsWith("image/") ? (
-                        <img src={previewUrl || ""} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
-                      ) : (
-                        <div className="w-full h-48 bg-muted rounded-xl flex items-center justify-center">
-                          <div className="text-center">
-                            <Video className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">{selectedFile.name}</p>
+                  {answerCorrect && (
+                    <Button variant="ghost" onClick={() => onContinue()}>
+                      Continue
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Submit Your Work</CardTitle>
+                <CardDescription>Upload an image or video to complete this task</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
+                  {!selectedFile ? (
+                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full h-24 border-2 border-dashed">
+                      <div className="text-center">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Click to select file</p>
+                      </div>
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="relative">
+                        {selectedFile.type.startsWith("image/") ? (
+                          <img src={previewUrl || ""} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
+                        ) : (
+                          <div className="w-full h-48 bg-muted rounded-xl flex items-center justify-center">
+                            <div className="text-center">
+                              <Video className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">{selectedFile.name}</p>
+                            </div>
                           </div>
-                        </div>
-                      )}
-
-                      <Button onClick={handleRemoveFile} variant="destructive" size="sm" className="absolute top-2 right-2">
-                        <X className="w-4 h-4" />
-                      </Button>
+                        )}
+                        <Button onClick={handleRemoveFile} variant="destructive" size="sm" className="absolute top-2 right-2">
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>{selectedFile.name}</p>
+                        <p>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
                     </div>
-
-                    <div className="text-sm text-muted-foreground">
-                      <p>{selectedFile.name}</p>
-                      <p>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="caption" className="text-sm font-medium">Caption (Optional)</label>
-                <Input id="caption" placeholder="Add a caption to describe your submission..." value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={200} />
-                <p className="text-xs text-muted-foreground text-right">{caption.length}/200</p>
-              </div>
-
-              <Button onClick={handleSubmit} disabled={!selectedFile || createSubmissionMutation.isLoading || updateProgressMutation.isLoading} className="w-full">
-                {createSubmissionMutation.isLoading || updateProgressMutation.isLoading ? (
-                  <>
-                    <LoadingSpinner size="sm" className="mr-2" /> Submitting...
-                  </>
-                ) : (
-                  "Submit for Review"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="caption" className="text-sm font-medium">Caption (Optional)</label>
+                  <Input id="caption" placeholder="Add a caption to describe your submission..." value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={200} />
+                  <p className="text-xs text-muted-foreground text-right">{caption.length}/200</p>
+                </div>
+                <Button onClick={handleSubmit} disabled={!selectedFile || createSubmissionMutation.isLoading || updateProgressMutation.isLoading} className="w-full">
+                  {createSubmissionMutation.isLoading || updateProgressMutation.isLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" className="mr-2" /> Submitting...
+                    </>
+                  ) : (
+                    "Submit for Review"
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )
         )}
 
         {justSubmitted && (
