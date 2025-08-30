@@ -366,6 +366,21 @@ function TeamDetail({ team, onBack }: { team: any, onBack: () => void }) {
               ) : (
                 <p className="text-gray-400 italic">No description provided</p>
               )}
+              {/* Team Members */}
+              <div className="mt-4">
+                <div className="text-sm font-semibold text-blue-700 mb-1">Team Members</div>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(team.members) && team.members.length > 0 ? (
+                    team.members.map((member: string, idx: number) => (
+                      <span key={idx} className="bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs font-medium">
+                        {member}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 italic">No members yet.</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
