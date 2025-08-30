@@ -179,38 +179,54 @@ export function JourneyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24 font-['Inter','Poppins',sans-serif]">
       {/* Header */}
-      <div className="bg-primary text-white p-6">
-        <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-bold mb-4">Our Journey</h1>
-          {/* Progress Overview */}
-          <div className="space-y-4">
-            <Progress 
-              value={completedTasks} 
-              max={totalTasks} 
-              className="bg-primary-800"
-            />
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold">{completedTasks}</div>
-                <div className="text-sm text-primary-200">Completed</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{totalTasks}</div>
-                <div className="text-sm text-primary-200">Total Tasks</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{earnedPoints}</div>
-                <div className="text-sm text-primary-200">Points</div>
-              </div>
+      <div className="w-full flex justify-center px-2 pt-4">
+        <div className="w-full max-w-lg">
+          <div className="rounded-3xl shadow-lg bg-gradient-to-br from-[#BB133A] to-pink-300 p-5 flex items-center relative overflow-hidden">
+            <div className="flex-1">
+              <div className="uppercase text-xs tracking-widest text-white/80 font-semibold mb-1">FSV UK – Scavenger Hunt</div>
+              <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Our Journey</div>
+              <div className="text-white/90 text-sm font-medium">Track your progress and complete tasks!</div>
+            </div>
+            {/* Map Icon */}
+            <div className="ml-2 flex-shrink-0">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none" className="drop-shadow-lg">
+                <circle cx="24" cy="24" r="22" fill="#fff" fillOpacity="0.18" />
+                <path d="M24 12l6 18-6-4-6 4 6-18z" stroke="#fff" strokeWidth="2.2" fill="#BB133A"/>
+                <circle cx="24" cy="24" r="2.5" fill="#fff" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Progress Overview */}
+      <div className="max-w-lg mx-auto px-2 py-4">
+        <div className="space-y-4">
+          <Progress 
+            value={completedTasks} 
+            max={totalTasks} 
+            className="bg-primary-800"
+          />
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold">{completedTasks}</div>
+              <div className="text-sm text-primary-200">Completed</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{totalTasks}</div>
+              <div className="text-sm text-primary-200">Total Tasks</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{earnedPoints}</div>
+              <div className="text-sm text-primary-200">Points</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tasks List - zobraz len jednu aktívnu úlohu */}
-      <div className="max-w-lg mx-auto p-6 space-y-4">
+  <div className="max-w-lg mx-auto px-2 py-4 space-y-4">
         {tasks?.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">

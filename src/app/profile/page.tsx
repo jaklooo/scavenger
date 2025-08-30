@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { updateTeam } from "@/services/teams";
+import { getTeam, updateTeam } from "@/services/teams";
 import { uploadFile } from "../../services/storage";
 import { ArrowLeft, Camera, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,13 +16,28 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 
 export default function ProfilePage() {
+  const { userData } = useAuth();
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [members, setMembers] = useState<string[]>([]);
+  const [newMember, setNewMember] = useState("");
+  const [teamData, setTeamData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { userData } = useAuth();
+  // Load team data on mount
+  useEffect(() => {
+    const fetchTeam = async () => {
+      if (userData?.teamId) {
+        const team = await getTeam(userData.teamId);
+        setTeamData(team);
+        setDescription(team?.description || "");
+        setMembers(team?.members || []);
+      }
+    };
+    fetchTeam();
+  }, [userData?.teamId]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,22 +68,23 @@ export default function ProfilePage() {
       toast.error("No team found");
       return;
     }
-
     setIsLoading(true);
     try {
-      let photoUrl = undefined;
-
+      let photoUrl = teamData?.profilePhoto;
       if (profilePhoto) {
         photoUrl = await uploadFile(profilePhoto, `teams/${userData.teamId}/profile`);
       }
-
       await updateTeam(userData.teamId, {
         description: description.trim() || undefined,
-        ...(photoUrl && { profilePhoto: photoUrl }),
+        profilePhoto: photoUrl,
+        members: members.filter(m => m.trim().length > 0),
       });
-
       toast.success("Profile updated successfully!");
-      router.push("/journey");
+      // Refresh team data
+      const team = await getTeam(userData.teamId);
+      setTeamData(team);
+      setProfilePhoto(null);
+      setPreviewUrl(null);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
@@ -89,113 +105,120 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="bg-primary text-white p-6">
-        <div className="max-w-lg mx-auto">
-          <Button
-            onClick={() => router.push("/journey")}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/10 p-0 h-auto mb-4"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" /> Back to Tasks
-          </Button>
-
-          <h1 className="text-2xl font-bold">Team Profile</h1>
-          <p className="text-primary-200 mt-1">Customize your &apos;team&apos;s&apos; profile</p>
-        </div>
-      </div>
-
-      <div className="max-w-lg mx-auto p-6 space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Photo</CardTitle>
-            <CardDescription>Upload a photo that represents your team</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-
-            {!profilePhoto ? (
+    <div className="min-h-screen bg-background pb-24 font-['Inter','Poppins',sans-serif]">
+      {/* Profile Card (LinkedIn style) */}
+      <div className="w-full flex justify-center px-2 pt-4">
+        <div className="w-full max-w-lg">
+          <div className="rounded-3xl shadow-xl bg-white/90 p-6 flex flex-col items-center relative overflow-hidden border border-blue-200">
+            {/* Profile Photo */}
+            <div className="relative mb-3">
+              <Image
+                src={previewUrl || teamData?.profilePhoto || "/avatar-placeholder.png"}
+                alt="Team profile photo"
+                width={120}
+                height={120}
+                className="rounded-full border-4 border-blue-300 shadow-lg object-cover w-28 h-28"
+              />
               <Button
                 onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full h-32 border-2 border-dashed"
+                size="icon"
+                className="absolute bottom-2 right-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow"
               >
-                <div className="text-center">
-                  <Camera className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to select photo</p>
-                </div>
+                <Camera className="w-5 h-5" />
               </Button>
-            ) : (
-              <div className="space-y-3">
-                <div className="relative">
-                  <Image
-                    src={previewUrl || ""}
-                    alt="Team profile photo"
-                    width={400}
-                    height={192}
-                    className="w-full h-48 object-cover rounded-xl"
-                  />
-                  <Button
-                    onClick={handleRemoveFile}
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {(profilePhoto.size / 1024 / 1024).toFixed(2)} MB
-                </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </div>
+            {/* Team Name */}
+            <div className="text-2xl font-bold text-blue-900 mb-1 text-center">{teamData?.name}</div>
+            {/* Description */}
+            <div className="text-gray-700 text-center mb-2 min-h-[32px]">
+              {teamData?.description || <span className="italic text-gray-400">No description yet.</span>}
+            </div>
+            {/* Members */}
+            <div className="flex flex-col items-center w-full">
+              <div className="text-sm font-semibold text-blue-700 mb-1">Team Members</div>
+              <div className="flex flex-wrap gap-2 justify-center mb-2">
+                {members.length === 0 && <span className="text-gray-400 italic">No members yet.</span>}
+                {members.map((member, idx) => (
+                  <span key={idx} className="bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs font-medium flex items-center gap-1">
+                    {member}
+                    <button
+                      type="button"
+                      className="ml-1 text-blue-400 hover:text-red-500"
+                      onClick={() => setMembers(members.filter((_, i) => i !== idx))}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>About Your Team</CardTitle>
-            <CardDescription>Tell others about your team and your adventure</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Write something about your team..."
-              value={description}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
-              rows={4}
-              maxLength={500}
-              className="resize-none"
-            />
-            <p className="text-xs text-muted-foreground text-right mt-2">
-              {description.length}/500
-            </p>
-          </CardContent>
-        </Card>
-
-        <Button
-          onClick={handleSubmit}
-          disabled={isLoading || (!profilePhoto && !description.trim())}
-          className="w-full"
-        >
-          {isLoading ? (
-            <>
-              <LoadingSpinner size="sm" className="mr-2" /> Updating Profile...
-            </>
-          ) : (
-            <>
-              <Upload className="w-4 h-4 mr-2" /> Update Profile
-            </>
-          )}
-        </Button>
+              <div className="flex gap-2 w-full max-w-xs mx-auto">
+                <Input
+                  type="text"
+                  placeholder="Add member name"
+                  value={newMember}
+                  onChange={e => setNewMember(e.target.value)}
+                  className="flex-1"
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && newMember.trim()) {
+                      setMembers([...members, newMember.trim()]);
+                      setNewMember("");
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (newMember.trim()) {
+                      setMembers([...members, newMember.trim()]);
+                      setNewMember("");
+                    }
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Add
+                </Button>
+              </div>
+            </div>
+            {/* Edit Description */}
+            <div className="w-full mt-4">
+              <Textarea
+                placeholder="Write something about your team..."
+                value={description}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+                rows={3}
+                maxLength={500}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground text-right mt-1">
+                {description.length}/500
+              </p>
+            </div>
+            {/* Save Button */}
+            <Button
+              onClick={handleSubmit}
+              disabled={isLoading || (!description.trim() && !profilePhoto && members.join() === (teamData?.members || []).join())}
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+            >
+              {isLoading ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" /> Save Profile
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
-
       <BottomNavigation />
     </div>
   );

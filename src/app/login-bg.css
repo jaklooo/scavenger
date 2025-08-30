@@ -1,0 +1,24 @@
+/* Prague Castle background for login/auth screens */
+.login-bg {
+  background: url('/prague-castle-bg.jpg') bottom center/contain no-repeat fixed;
+  background-color: #f8fafc;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.70;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .login-bg {
+    background-size: contain;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100dvh;
+    height: 100dvh;
+    width: 100vw;
+  }
+}

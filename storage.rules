@@ -19,6 +19,11 @@ service firebase.storage {
              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.teamId == teamId;
     }
     
+    // Profile photo upload
+    match /teams/{teamId}/profile {
+      allow read, write: if isAuthenticated() && (belongsToTeam(teamId) || isAdmin());
+    }
+
     // Team submissions (old path)
     match /teams/{teamId}/submissions/{fileName} {
       allow read, write: if isAuthenticated() && 

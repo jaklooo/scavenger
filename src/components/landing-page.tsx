@@ -11,28 +11,50 @@ export function LandingPage() {
   const [activeForm, setActiveForm] = useState<"none" | "register" | "login" | "admin">("none");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo and Header */}
-        <div className="text-center">
-          <div className="mb-6">
-            <div className="w-20 h-20 mx-auto bg-primary rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-              FSV<br />UK
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            FSV UK
-            <br />
-            <span className="text-primary">SCAVENGER HUNT</span>
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Join the adventure and complete challenges with your team!
-          </p>
+    <div
+      className="min-h-screen w-full flex flex-col items-center justify-center p-4"
+      style={{
+        backgroundImage: "url('/castle-bg.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* Logo and Header */}
+      <div className="text-center w-full max-w-md mx-auto mb-8 mt-8">
+        <div className="mb-6 flex justify-center">
+          <img
+            src="/logo-bg.png"
+            alt="FSV UK logo"
+            className="w-20 h-20 rounded-2xl shadow-lg object-cover"
+            style={{ background: '#BB133A' }}
+          />
         </div>
+        {/* Google Fonts import pre Anton */}
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Anton:wght@400&display=swap');`}</style>
+        <h1
+          className="mb-4"
+          style={{
+            fontFamily: `'Anton', Impact, sans-serif`,
+            fontSize: '2.8rem',
+            fontWeight: 900,
+            color: 'white',
+            letterSpacing: '0.08em',
+            textShadow: '0 2px 12px rgba(0,0,0,0.7)'
+          }}
+        >
+          SCAVENGER HUNT
+        </h1>
+        <p className="text-white text-lg drop-shadow-md">
+          Join the adventure and complete challenges with your team!
+        </p>
+      </div>
 
-        {/* Action Buttons */}
+      {/* Action Buttons & Forms */}
+      <div className="w-full max-w-md mx-auto space-y-8">
         {activeForm === "none" && (
-          <Card className="border-2">
+          <Card className="border-2 bg-white/90 backdrop-blur-sm">
             <CardHeader className="text-center">
               <CardTitle>Get Started</CardTitle>
               <CardDescription>
@@ -55,14 +77,12 @@ export function LandingPage() {
               >
                 Team Login
               </Button>
-              
             </CardContent>
           </Card>
         )}
 
-        {/* Registration Form */}
         {activeForm === "register" && (
-          <Card className="border-2">
+          <Card className="border-2 bg-white/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Team Registration</CardTitle>
               <CardDescription>
@@ -75,9 +95,8 @@ export function LandingPage() {
           </Card>
         )}
 
-        {/* Login Form */}
         {activeForm === "login" && (
-          <Card className="border-2">
+          <Card className="border-2 bg-white/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Team Login</CardTitle>
               <CardDescription>
@@ -90,13 +109,13 @@ export function LandingPage() {
           </Card>
         )}
 
-        {/* Admin Login Form */}
         {activeForm === "admin" && (
           <AdminLoginForm onBack={() => setActiveForm("none")} />
         )}
 
+
         {/* Footer */}
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm text-white drop-shadow-md mt-8">
           <p>© 2025 FSV UK. All rights reserved.</p>
         </div>
       </div>

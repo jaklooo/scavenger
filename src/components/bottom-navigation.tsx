@@ -38,30 +38,34 @@ export function BottomNavigation() {
   const router = useRouter();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border md:hidden">
-      <div className="flex items-center justify-around px-4 py-2">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          
-          return (
-            <Button
-              key={item.name}
-              onClick={() => router.push(item.href)}
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "flex flex-col items-center space-y-1 h-auto py-2 px-3 min-w-0 flex-1",
-                isActive && "text-primary bg-primary/10"
-              )}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-xs font-medium truncate">
-                {item.name}
-              </span>
-            </Button>
-          );
-        })}
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+      <div className="mx-auto max-w-lg rounded-t-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-around px-2 py-2 bg-white/40 backdrop-blur-[10px] border-t border-gray-200" style={{backdropFilter:'blur(16px) saturate(1.2)'}}>
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <button
+                key={item.name}
+                onClick={() => router.push(item.href)}
+                className={cn(
+                  "flex flex-col items-center space-y-0.5 h-auto py-2 px-2 min-w-0 flex-1 rounded-xl transition-all relative",
+                  isActive
+                    ? "text-[#BB133A] bg-[#BB133A]/10 font-bold shadow-sm"
+                    : "text-gray-500 hover:text-[#BB133A]/80"
+                )}
+                style={{ fontFamily: 'Inter, Poppins, sans-serif' }}
+              >
+                {/* Active dot */}
+                {isActive && (
+                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#BB133A] shadow-md"></span>
+                )}
+                <Icon className={cn("w-6 h-6 mb-0.5", isActive ? "text-[#BB133A]" : "")} />
+                <span className={cn("text-xs", isActive ? "text-[#BB133A]" : "")}>{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -41,15 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      
       if (firebaseUser) {
         try {
           // Get user data from Firestore
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-          
+          let parsedData: User | null = null;
           if (userDoc.exists()) {
             const data = userDoc.data();
-            const parsedData = UserSchema.parse({
+            parsedData = UserSchema.parse({
               ...data,
               createdAt: data.createdAt?.toDate() || new Date(),
             });
@@ -63,13 +62,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               role: isAdminEmail ? "admin" : "team",
               createdAt: new Date(),
             };
-
             await setDoc(doc(db, "users", firebaseUser.uid), {
               ...newUserData,
               createdAt: new Date(),
             });
-
+            parsedData = newUserData;
             setUserData(newUserData);
+          }
+          // Always sync teamId if available from userData (e.g. after registration)
+          if (parsedData && parsedData.teamId) {
+            await setDoc(doc(db, "users", firebaseUser.uid), {
+              ...parsedData,
+              teamId: parsedData.teamId,
+              createdAt: parsedData.createdAt || new Date(),
+            }, { merge: true });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -78,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUserData(null);
       }
-      
       setLoading(false);
     });
 

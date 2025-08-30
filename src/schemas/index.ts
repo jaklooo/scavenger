@@ -20,17 +20,20 @@ export const TeamSchema = z.object({
   introductionSeen: z.boolean().optional(),
   profilePhoto: z.string().optional(),
   description: z.string().optional(),
+  members: z.array(z.string().min(1, "Member name required")).optional(),
 });
 
 export type Team = z.infer<typeof TeamSchema>;
 
 // Task schemas
+
 export const TaskSchema = z.object({
   title: z.string().min(1, "Task title is required"),
   description: z.string().min(1, "Task description is required"),
   points: z.number().min(1, "Points must be at least 1"),
   order: z.number().min(0, "Order must be non-negative"),
   active: z.boolean().default(true),
+  validation: z.string().optional(),
 });
 
 export type Task = z.infer<typeof TaskSchema>;

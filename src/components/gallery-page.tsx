@@ -26,18 +26,29 @@ export function GalleryPage() {
   const approvedSubmissions = submissions?.filter(s => s.approved === true) || [];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24 font-['Inter','Poppins',sans-serif]">
       {/* Header */}
-      <div className="bg-primary text-white p-6">
-        <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-bold mb-2">Our Gallery</h1>
-          <p className="text-primary-200">
-            {approvedSubmissions.length} approved submissions
-          </p>
+      <div className="w-full flex justify-center px-2 pt-4">
+        <div className="w-full max-w-lg">
+          <div className="rounded-3xl shadow-lg bg-gradient-to-br from-green-400 to-green-200 p-5 flex items-center relative overflow-hidden">
+            <div className="flex-1">
+              <div className="uppercase text-xs tracking-widest text-white/80 font-semibold mb-1">FSV UK – Scavenger Hunt</div>
+              <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Our Gallery</div>
+              <div className="text-white/90 text-sm font-medium">{approvedSubmissions.length} approved submissions</div>
+            </div>
+            {/* Camera Icon */}
+            <div className="ml-2 flex-shrink-0">
+              <svg width="44" height="44" viewBox="0 0 48 48" fill="none" className="drop-shadow-lg">
+                <circle cx="24" cy="24" r="22" fill="#fff" fillOpacity="0.18" />
+                <rect x="14" y="18" width="20" height="14" rx="4" fill="#22c55e" stroke="#fff" strokeWidth="2.2" />
+                <circle cx="24" cy="25" r="4" fill="#fff" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto p-6">
+  <div className="max-w-lg mx-auto px-2 py-4">
         {approvedSubmissions.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
