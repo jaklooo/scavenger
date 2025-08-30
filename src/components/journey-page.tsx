@@ -200,33 +200,40 @@ export function JourneyPage() {
           </div>
         </div>
       </div>
-      {/* Progress Overview */}
+
+      {/* Progress Overview - krajší vizuál */}
       <div className="max-w-lg mx-auto px-2 py-4">
-        <div className="space-y-4">
-          <Progress 
-            value={completedTasks} 
-            max={totalTasks} 
-            className="bg-primary-800"
-          />
+        <div className="space-y-6">
+          <div className="relative w-full h-7 flex items-center">
+            <div className="absolute left-0 top-0 w-full h-full rounded-full bg-gradient-to-r from-primary to-pink-400 opacity-20" />
+            <div
+              className="transition-all duration-700 ease-in-out h-full rounded-full bg-gradient-to-r from-[#BB133A] to-pink-400 shadow-lg"
+              style={{ width: `${totalTasks ? (completedTasks / totalTasks) * 100 : 0}%` }}
+            />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-lg drop-shadow">
+              {totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0}%
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold">{completedTasks}</div>
-              <div className="text-sm text-primary-200">Completed</div>
+              <div className="text-2xl font-bold text-primary">{completedTasks}</div>
+              <div className="text-sm text-primary-400">Completed</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{totalTasks}</div>
-              <div className="text-sm text-primary-200">Total Tasks</div>
+              <div className="text-2xl font-bold text-primary">{totalTasks}</div>
+              <div className="text-sm text-primary-400">Total Tasks</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{earnedPoints}</div>
-              <div className="text-sm text-primary-200">Points</div>
+              <div className="text-2xl font-bold text-primary">{earnedPoints}</div>
+              <div className="text-sm text-primary-400">Points</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tasks List - zobraz len jednu aktívnu úlohu */}
-  <div className="max-w-lg mx-auto px-2 py-4 space-y-4">
+
+      {/* Tasks List - zobraz všetky tasky pre testovanie */}
+      <div className="max-w-lg mx-auto px-2 py-4 space-y-4">
         {tasks?.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">
@@ -236,29 +243,29 @@ export function JourneyPage() {
               </p>
             </CardContent>
           </Card>
-        ) : nextTask ? (
-          (() => {
-            const status = getTaskStatus(nextTask!.id);
+        ) : (
+          tasks?.map((task, idx) => {
+            const status = getTaskStatus(task.id);
             const Icon = getTaskIcon(status);
             return (
-              <Card 
-                key={nextTask!.id}
+              <Card
+                key={task.id}
                 className={cn(
                   "cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20",
                   status === "done" && "bg-green-50 border-green-200",
                   status === "in_review" && "bg-yellow-50 border-yellow-200"
                 )}
-                onClick={() => setSelectedTaskId(nextTask!.id)}
+                onClick={() => setSelectedTaskId(task.id)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                        {nextTaskIndex + 1}
+                        {idx + 1}
                       </div>
                       <div className="flex-1">
                         <CardTitle className="text-lg leading-tight">
-                          {nextTask!.title}
+                          {task.title}
                         </CardTitle>
                         <div className="flex items-center space-x-2 mt-1">
                           <Badge variant={getTaskBadgeVariant(status)}>
@@ -266,32 +273,23 @@ export function JourneyPage() {
                             {status.replace("_", " ")}
                           </Badge>
                           <span className="text-sm text-muted-foreground">
-                            {nextTask!.points} pts
+                            {task.points} pts
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
-                {nextTask!.description && (
+                {task.description && (
                   <CardContent className="pt-0">
                     <CardDescription className="line-clamp-2">
-                      {nextTask!.description}
+                      {task.description}
                     </CardDescription>
                   </CardContent>
                 )}
               </Card>
             );
-          })()
-        ) : (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Trophy className="w-12 h-12 mx-auto text-green-400 mb-4" />
-              <p className="text-green-700 font-semibold">
-                Congratulations! All tasks are completed.
-              </p>
-            </CardContent>
-          </Card>
+          })
         )}
       </div>
 

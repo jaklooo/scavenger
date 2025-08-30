@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { useUpdateTaskProgress } from "@/hooks/use-tasks";
 import { Task, Progress } from "@/schemas";
 import { ArrowLeft, Upload, Camera, Video, X, Eye } from "lucide-react";
 import toast from "react-hot-toast";
+import { GoogleMapsLoader } from "./GoogleMapsLoader";
+const InteractiveMap = dynamic(() => import("./InteractiveMap"), { ssr: false });
 
 interface TaskDetailProps {
   task: Task & { id: string };
@@ -140,19 +143,58 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
       </div>
 
       <div className="max-w-lg mx-auto p-6 space-y-6">
-        {isFirstTask && !arrived && (
+        {/* Google Maps Loader for InteractiveMap */}
+        <GoogleMapsLoader />
+        {/* Map for all tasks except final message, s rôznymi miestami pre tasky 2 a 3 */}
+        {task.title?.toLowerCase() !== "final message" && (
           <Card>
             <CardHeader>
               <CardTitle>Go to the place on the map</CardTitle>
-              <CardDescription>Visit Celetná 597, 110 00 Staré Město and confirm your arrival.</CardDescription>
+              <CardDescription>
+                {task.order === 2 || task.id === '2'
+                  ? 'Celetná 597/13, 110 00 Staré Město, Česko'
+                  : task.order === 3 || task.id === '3'
+                    ? 'UJOP Charles University, Voršilská 1, 110 00 Nové Město, Česko'
+                    : task.order === 4 || task.id === '4'
+                      ? 'Smetanovo nábř. 195/5, 110 00 Staré Město, Česko'
+                      : task.order === 5 || task.id === '5'
+                        ? 'Staré Město, 110 00 Praha 1, Česko'
+                        : task.order === 6 || task.id === '6'
+                          ? 'nám. J. Palacha 1, 110 00 Staré Město, Česko'
+                          : task.order === 7 || task.id === '7'
+                            ? '50.079452547414306, 14.430391810571681'
+                            : task.order === 8 || task.id === '8'
+                              ? 'Faculty of Law, 50.09171152842647, 14.417524515157798'
+                              : task.order === 9 || task.id === '9'
+                                ? 'Charles Bridge, 50.086208690029736, 14.414001196091295'
+                                : 'Ovocný trh 560/5, 110 00 Staré Město, Praha'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="h-64 w-full rounded-xl overflow-hidden mb-4">
-                <GoogleMap lat={50.088479} lng={14.421332} />
+                <InteractiveMap
+                  target={
+                    task.order === 2 || task.id === '2'
+                      ? { lat: 50.087166, lng: 14.424051 }
+                      : task.order === 3 || task.id === '3'
+                        ? { lat: 50.080380, lng: 14.416807 }
+                        : task.order === 4 || task.id === '4'
+                          ? { lat: 50.082381, lng: 14.413248 }
+                          : task.order === 5 || task.id === '5'
+                            ? { lat: 50.087027, lng: 14.417338 }
+                            : task.order === 6 || task.id === '6'
+                              ? { lat: 50.088989, lng: 14.415784 }
+                              : task.order === 7 || task.id === '7'
+                                ? { lat: 50.079452547414306, lng: 14.430391810571681 }
+                                : task.order === 8 || task.id === '8'
+                                  ? { lat: 50.09171152842647, lng: 14.417524515157798 }
+                                  : task.order === 9 || task.id === '9'
+                                    ? { lat: 50.086208690029736, lng: 14.414001196091295 }
+                                    : { lat: 50.087451, lng: 14.425519 }
+                  }
+                  height="256px"
+                />
               </div>
-              <Button className="w-full" onClick={() => setArrived(true)}>
-                We are on place
-              </Button>
             </CardContent>
           </Card>
         )}
