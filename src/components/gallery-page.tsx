@@ -11,7 +11,7 @@ import { Camera, Video, Calendar, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function GalleryPage() {
-  const [selectedMedia, setSelectedMedia] = useState<any>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   
   const { data: submissions, isLoading } = useTeamSubmissions();
 
@@ -61,11 +61,11 @@ export function GalleryPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            {approvedSubmissions.map((submission) => (
+            {approvedSubmissions.map((submission, idx) => (
               <div
                 key={submission.id}
                 className="aspect-square relative cursor-pointer group"
-                onClick={() => setSelectedMedia(submission)}
+                onClick={() => setSelectedIndex(idx)}
               >
                 {submission.downloadURL ? (
                   submission.type === "image" ? (
@@ -121,10 +121,18 @@ export function GalleryPage() {
       </div>
 
       {/* Media Modal */}
-      {selectedMedia && (
+      {selectedIndex !== null && approvedSubmissions[selectedIndex] && (
         <MediaModal
-          media={selectedMedia}
-          onClose={() => setSelectedMedia(null)}
+          media={{
+            ...approvedSubmissions[selectedIndex],
+            id: approvedSubmissions[selectedIndex].id ?? "",
+            downloadUrl: approvedSubmissions[selectedIndex].downloadURL
+          }}
+          onClose={() => setSelectedIndex(null)}
+          onPrev={() => setSelectedIndex(i => (i !== null && i > 0 ? i - 1 : i))}
+          onNext={() => setSelectedIndex(i => (i !== null && i < approvedSubmissions.length - 1 ? i + 1 : i))}
+          hasPrev={selectedIndex > 0}
+          hasNext={selectedIndex < approvedSubmissions.length - 1}
         />
       )}
 

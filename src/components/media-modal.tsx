@@ -8,24 +8,55 @@ import { Submission } from "@/schemas";
 interface MediaModalProps {
   media: Submission & { id: string; downloadUrl?: string };
   onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
 }
 
-export function MediaModal({ media, onClose }: MediaModalProps) {
+export function MediaModal({ media, onClose, onPrev, onNext, hasPrev, hasNext }: MediaModalProps) {
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+      } else if (e.key === "ArrowLeft" && onPrev) {
+        onPrev();
+      } else if (e.key === "ArrowRight" && onNext) {
+        onNext();
       }
     };
-
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
-
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = "unset";
     };
-  }, [onClose]);
+  }, [onClose, onPrev, onNext]);
+
+  // Swipe support
+  useEffect(() => {
+    let startX: number | null = null;
+    let endX: number | null = null;
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+    };
+    const handleTouchEnd = (e: TouchEvent) => {
+      endX = e.changedTouches[0].clientX;
+      if (startX !== null && endX !== null) {
+        const diff = endX - startX;
+        if (diff > 50 && onPrev) onPrev();
+        if (diff < -50 && onNext) onNext();
+      }
+      startX = null;
+      endX = null;
+    };
+    document.addEventListener("touchstart", handleTouchStart);
+    document.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [onPrev, onNext]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -48,6 +79,30 @@ export function MediaModal({ media, onClose }: MediaModalProps) {
         >
           <X className="w-6 h-6" />
         </Button>
+
+        {/* Prev/Next Buttons */}
+        {hasPrev && (
+          <Button
+            onClick={onPrev}
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white hover:bg-black/70"
+            aria-label="Previous"
+          >
+            &#8592;
+          </Button>
+        )}
+        {hasNext && (
+          <Button
+            onClick={onNext}
+            variant="ghost"
+            size="icon"
+            className="absolute right-14 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white hover:bg-black/70"
+            aria-label="Next"
+          >
+            &#8594;
+          </Button>
+        )}
 
         <div className="bg-background rounded-2xl overflow-hidden max-h-[90vh] flex flex-col">
           {/* Media Content */}
@@ -76,7 +131,7 @@ export function MediaModal({ media, onClose }: MediaModalProps) {
             )}
           </div>
 
-          {/* Media Info */}
+          {/* Media Info + Download/Open */}
           <div className="p-6 space-y-4">
             {media.caption && (
               <div>
@@ -90,11 +145,33 @@ export function MediaModal({ media, onClose }: MediaModalProps) {
                 <Calendar className="w-4 h-4" />
                 <span>{media.createdAt.toLocaleDateString()}</span>
               </div>
-              
               <div className="flex items-center space-x-1">
                 <span className="capitalize">{media.type}</span>
               </div>
             </div>
+
+            {/* Download/Open Buttons */}
+            {media.downloadUrl && (
+              <div className="flex gap-3 pt-2">
+                <a
+                  href={media.downloadUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow"
+                >
+                  Stiahnuť
+                </a>
+                <a
+                  href={media.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold shadow"
+                >
+                  Otvoriť v novom okne
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
