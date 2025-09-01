@@ -17,79 +17,17 @@ import { cn } from "@/lib/utils";
 
 export function JourneyPage() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [showIntro, setShowIntro] = useState(false);
-  const [introLoading, setIntroLoading] = useState(true);
 
   const { data: tasks, isLoading: tasksLoading } = useTasks();
   const { data: progress, isLoading: progressLoading } = useTeamProgress();
   const { userData } = useAuth();
 
-  useEffect(() => {
-    let ignore = false;
-    const checkIntro = async () => {
-      if (!userData?.teamId) {
-        if (!ignore) setIntroLoading(false);
-        return;
-      }
-      try {
-        const res = await fetch(`/api/teams/${userData.teamId}`);
-        const team = await res.json();
-        if (!ignore) setShowIntro(!(team && team.introductionSeen));
-      } catch {
-        if (!ignore) setShowIntro(true);
-      } finally {
-        if (!ignore) setIntroLoading(false);
-      }
-    };
-    checkIntro();
-    return () => { ignore = true; };
-  }, [userData?.teamId]);
-
-  const isLoading = tasksLoading || progressLoading || introLoading;
-
-  const handleIntroContinue = async () => {
-    setIntroLoading(true);
-    if (userData?.teamId) {
-      await updateTeam(userData.teamId, { introductionSeen: true });
-    }
-    setShowIntro(false);
-    setIntroLoading(false);
-  };
+  const isLoading = tasksLoading || progressLoading;
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  if (showIntro) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/95 overflow-y-auto">
-        <div className="max-w-lg w-full bg-white rounded-2xl shadow-2xl border-4 border-primary relative animate-fade-in h-full max-h-screen flex flex-col justify-center p-0 sm:p-8">
-          <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 overflow-y-auto">
-            <div className="mb-4">
-              <span className="inline-block bg-primary text-white rounded-full p-3 mb-2">
-                <Trophy className="w-8 h-8" />
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 text-primary font-serif tracking-tight">Welcome, brave adventurers!</h2>
-            </div>
-            <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 font-medium">
-              You’ve entered the legendary world of Charles University, where knowledge is power, food is survival, and trams are always late. It is a place where history, knowledge, and student life have intertwined for nearly 700 years. But rumours speak of a hidden legacy, the path walked by the very first international students of Prague, long forgotten.<br /><br />
-              Long ago, the First International Student left behind a Student Survival Map, a guide to thriving in Prague. However, the map was divided into pieces, scattered across the city. Only by solving riddles, working together, and facing the busy tourist-filled streets can you put it back together.
-            </p>
-          </div>
-          <div className="p-4 sm:p-8 border-t border-primary/10 bg-white">
-            <Button
-              className="w-full py-3 text-lg font-bold bg-primary hover:bg-primary-800 text-white rounded-xl shadow-lg transition"
-              onClick={handleIntroContinue}
-              disabled={introLoading}
-            >
-              Continue
-            </Button>
-          </div>
-        </div>
       </div>
     );
   }
@@ -143,12 +81,52 @@ export function JourneyPage() {
       return null;
     }
 
+    // Show intro only for the first task (index 0) and only if not shown before
+    const taskIndex = tasks?.findIndex(t => t.id === selectedTaskId) || -1;
+    // const shouldShowIntro = taskIndex === 0 && !introShown;
+
+    // if (shouldShowIntro) {
+    //   setShowIntro(true);
+    //   setIntroShown(true);
+    // }
+
+    // if (showIntro) {
+    //   return (
+    //     <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/95 overflow-y-auto">
+    //       <div className="max-w-lg w-full bg-white rounded-2xl shadow-2xl border-4 border-primary relative animate-fade-in h-full max-h-screen flex flex-col justify-center p-0 sm:p-8">
+    //         <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 overflow-y-auto">
+    //           <div className="mb-4">
+    //             <span className="inline-block bg-primary text-white rounded-full p-3 mb-2">
+    //               <Trophy className="w-8 h-8" />
+    //             </span>
+    //             <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 text-primary font-serif tracking-tight">Welcome, brave adventurers!</h2>
+    //           </div>
+    //           <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 font-medium">
+    //             You’ve entered the legendary world of Charles University, where knowledge is power, food is survival, and trams are always late. It is a place where history, knowledge, and student life have intertwined for nearly 700 years. But rumours speak of a hidden legacy, the path walked by the very first international students of Prague, long forgotten.<br /><br />
+    //             Long ago, the First International Student left behind a Student Survival Map, a guide to thriving in Prague. However, the map was divided into pieces, scattered across the city. Only by solving riddles, working together, and facing the busy tourist-filled streets can you put it back together.
+    //           </p>
+    //         </div>
+    //         <div className="p-4 sm:p-8 border-t border-primary/10 bg-white">
+    //           <Button
+    //             className="w-full py-3 text-lg font-bold bg-primary hover:bg-primary-800 text-white rounded-xl shadow-lg transition"
+    //             onClick={() => setShowIntro(false)}
+    //             disabled={introLoading}
+    //           >
+    //             Start Your Adventure
+    //           </Button>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   );
+    // }
+
     return (
       <TaskDetail 
         task={task} 
         onBack={() => setSelectedTaskId(null)}
         onContinue={handleContinueToNext}
         status={getTaskStatus(selectedTaskId)}
+        isFirstTask={task?.order === 1 || task?.title?.toLowerCase().includes('task 1') || taskIndex === 0}
       />
     );
   }
@@ -179,24 +157,20 @@ export function JourneyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 font-['Inter','Poppins',sans-serif]">
+    <div className="min-h-screen bg-background pb-24 font-['Inter','Poppins',sans-serif] relative">
+      {/* Dashboard Background */}
+      <div className="dashboard-bg"></div>
+      
+      {/* Content */}
+      <div className="relative z-10">
       {/* Header */}
-      <div className="w-full flex justify-center px-2 pt-4">
-        <div className="w-full max-w-lg">
-          <div className="rounded-3xl shadow-lg bg-gradient-to-br from-[#BB133A] to-pink-300 p-5 flex items-center relative overflow-hidden">
-            <div className="flex-1">
-              <div className="uppercase text-xs tracking-widest text-white/80 font-semibold mb-1">FSV UK – Scavenger Hunt</div>
-              <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Our Journey</div>
-              <div className="text-white/90 text-sm font-medium">Track your progress and complete tasks!</div>
-            </div>
-            {/* Map Icon */}
-            <div className="ml-2 flex-shrink-0">
-              <svg width="44" height="44" viewBox="0 0 48 48" fill="none" className="drop-shadow-lg">
-                <circle cx="24" cy="24" r="22" fill="#fff" fillOpacity="0.18" />
-                <path d="M24 12l6 18-6-4-6 4 6-18z" stroke="#fff" strokeWidth="2.2" fill="#BB133A"/>
-                <circle cx="24" cy="24" r="2.5" fill="#fff" />
-              </svg>
-            </div>
+      <div className="w-full flex justify-center px-2 pt-8">
+        <div className="w-full max-w-lg text-center">
+          <div className="text-3xl md:text-4xl font-extrabold text-[var(--text-primary)] leading-tight mb-2" style={{ fontFamily: 'Poppins, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+            Our Journey
+          </div>
+          <div className="text-[var(--text-secondary)] text-lg font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Track your progress and complete tasks!
           </div>
         </div>
       </div>
@@ -205,27 +179,27 @@ export function JourneyPage() {
       <div className="max-w-lg mx-auto px-2 py-4">
         <div className="space-y-6">
           <div className="relative w-full h-7 flex items-center">
-            <div className="absolute left-0 top-0 w-full h-full rounded-full bg-gradient-to-r from-primary to-pink-400 opacity-20" />
+            <div className="absolute left-0 top-0 w-full h-full rounded-full glass-card opacity-80" />
             <div
-              className="transition-all duration-700 ease-in-out h-full rounded-full bg-gradient-to-r from-[#BB133A] to-pink-400 shadow-lg"
+              className="transition-all duration-700 ease-in-out h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg"
               style={{ width: `${totalTasks ? (completedTasks / totalTasks) * 100 : 0}%` }}
             />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-lg drop-shadow">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--text-primary)] font-bold text-lg drop-shadow">
               {totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0}%
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-primary">{completedTasks}</div>
-              <div className="text-sm text-primary-400">Completed</div>
+            <div className="glass-card rounded-xl p-4">
+              <div className="text-2xl font-bold text-[var(--text-primary)]">{completedTasks}</div>
+              <div className="text-sm text-[var(--text-secondary)]">Completed</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-primary">{totalTasks}</div>
-              <div className="text-sm text-primary-400">Total Tasks</div>
+            <div className="glass-card rounded-xl p-4">
+              <div className="text-2xl font-bold text-[var(--text-primary)]">{totalTasks}</div>
+              <div className="text-sm text-[var(--text-secondary)]">Total Tasks</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-primary">{earnedPoints}</div>
-              <div className="text-sm text-primary-400">Points</div>
+            <div className="glass-card rounded-xl p-4">
+              <div className="text-2xl font-bold text-[var(--text-primary)]">{earnedPoints}</div>
+              <div className="text-sm text-[var(--text-secondary)]">Points</div>
             </div>
           </div>
         </div>
@@ -251,9 +225,10 @@ export function JourneyPage() {
               <Card
                 key={task.id}
                 className={cn(
-                  "cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20",
-                  status === "done" && "bg-green-50 border-green-200",
-                  status === "in_review" && "bg-yellow-50 border-yellow-200"
+                  "cursor-pointer hover:shadow-lg transition-all duration-200 hover:shadow-xl group",
+                  status === "done" && "glass-card-done",
+                  status === "in_review" && "glass-card-review",
+                  status !== "done" && status !== "in_review" && "glass-card"
                 )}
                 onClick={() => setSelectedTaskId(task.id)}
               >
@@ -264,15 +239,15 @@ export function JourneyPage() {
                         {idx + 1}
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-lg leading-tight">
+                        <CardTitle className="text-lg leading-tight text-[var(--text-primary)]">
                           {task.title}
                         </CardTitle>
                         <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant={getTaskBadgeVariant(status)}>
+                          <Badge variant={getTaskBadgeVariant(status)} className="bg-white/20 text-[var(--text-primary)] border-white/30">
                             <Icon className="w-3 h-3 mr-1" />
                             {status.replace("_", " ")}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-[var(--text-secondary)]">
                             {task.points} pts
                           </span>
                         </div>
@@ -282,7 +257,7 @@ export function JourneyPage() {
                 </CardHeader>
                 {task.description && (
                   <CardContent className="pt-0">
-                    <CardDescription className="line-clamp-2">
+                    <CardDescription className="text-[var(--text-secondary)]">
                       {task.description}
                     </CardDescription>
                   </CardContent>
@@ -291,6 +266,8 @@ export function JourneyPage() {
             );
           })
         )}
+      </div>
+
       </div>
 
       <BottomNavigation />

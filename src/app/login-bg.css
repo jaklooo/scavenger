@@ -1,7 +1,7 @@
 /* Prague Castle background for login/auth screens */
 .login-bg {
-  background: url('/prague-castle-bg.jpg') bottom center/contain no-repeat fixed;
-  background-color: #f8fafc;
+  background: var(--login-bg);
+  background-color: var(--bg-secondary);
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -21,4 +21,71 @@
     height: 100dvh;
     width: 100vw;
   }
+}
+
+/* Dashboard background with theme-aware styling */
+.dashboard-bg {
+  background: var(--dashboard-bg);
+  background-color: var(--bg-primary);
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .dashboard-bg {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100dvh;
+    height: 100dvh;
+    width: 100vw;
+  }
+}
+
+/* Light theme specific opacity */
+:root .dashboard-bg {
+  opacity: 0.5;
+}
+
+.dark .dashboard-bg {
+  opacity: 1;
+}
+
+/* Glass effect with gradient using CSS variables */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+.glass-card-done {
+  background: var(--glass-bg-done);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border-done);
+  box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+  color: var(--text-primary);
+}
+
+.glass-card-review {
+  background: var(--glass-bg-review);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border-review);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.15);
+  color: var(--text-primary);
+}
+
+.glass-nav {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  color: var(--text-primary);
 }

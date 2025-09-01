@@ -11,7 +11,8 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useTaskSubmissions, useCreateSubmission } from "@/hooks/use-submissions";
 import { useUpdateTaskProgress } from "@/hooks/use-tasks";
 import { Task, Progress } from "@/schemas";
-import { ArrowLeft, Upload, Camera, Video, X, Eye } from "lucide-react";
+import { ArrowLeft, Upload, Camera, Video, X, Eye, Trophy } from "lucide-react";
+import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { GoogleMapsLoader } from "./GoogleMapsLoader";
 const InteractiveMap = dynamic(() => import("./InteractiveMap"), { ssr: false });
@@ -21,6 +22,7 @@ interface TaskDetailProps {
   onBack: () => void;
   onContinue: () => void;
   status: Progress["status"];
+  isFirstTask?: boolean;
 }
 
 const GoogleMap = dynamic(() => import("./google-map"), {
@@ -28,7 +30,7 @@ const GoogleMap = dynamic(() => import("./google-map"), {
   loading: () => <div className="h-64 bg-muted flex items-center justify-center">Loading map...</div>,
 });
 
-export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps) {
+export function TaskDetail({ task, onBack, onContinue, status, isFirstTask = false }: TaskDetailProps) {
   const [arrived, setArrived] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
@@ -101,7 +103,7 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
 
 
   // Identify if this is the first task (by order or id)
-  const isFirstTask = task.order === 1 || task.id === "1";
+  // const isFirstTask = task.order === 1 || task.id === "1";
 
   // Parse validation type
   let validationType: "text:contains" | "text:equals" | "photo" | "manual" | "gps" | "none" = "none";
@@ -123,20 +125,63 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-primary text-white p-6">
+    <div className="min-h-screen bg-background relative">
+      {/* Dashboard Background */}
+      <div className="dashboard-bg"></div>
+      
+      {/* Introduction Section for First Task */}
+      {isFirstTask && (
+        <div className="relative z-10 px-4 pt-8 pb-6">
+          <div className="max-w-lg mx-auto">
+            <div className="glass-card p-6 mb-6">
+              <div className="text-center mb-4">
+                <div className="inline-block bg-[var(--accent-color)] text-white rounded-full p-3 mb-4">
+                  <Trophy className="w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-extrabold mb-4 text-[var(--text-primary)] font-serif tracking-tight">
+                  Welcome, brave adventurers!
+                </h2>
+              </div>
+              <p className="text-[var(--text-secondary)] text-base leading-relaxed mb-6">
+                You’ve entered the legendary world of Charles University, where knowledge is power, food is survival, and trams are always late. It is a place where history, knowledge, and student life have intertwined for nearly 700 years. But rumours speak of a hidden legacy, the path walked by the very first international students of Prague, long forgotten.<br /><br />
+                Long ago, the First International Student left behind a Student Survival Map, a guide to thriving in Prague. However, the map was divided into pieces, scattered across the city. Only by solving riddles, working together, and facing the busy tourist-filled streets can you put it back together.
+              </p>
+              <div className="text-center">
+                <Button 
+                  onClick={() => {
+                    // Scroll to task content
+                    const taskContent = document.querySelector('.task-content');
+                    taskContent?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-[var(--accent-color)] hover:bg-[var(--primary-color)] text-[var(--text-primary)] px-6 py-2"
+                >
+                  Start Your Adventure
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Content */}
+      <div className="relative z-10 task-content">
+      <div className={cn(
+        "glass-card text-[var(--text-primary)] p-6 mb-0",
+        status === "done" && "glass-card-done",
+        status === "in_review" && "glass-card-review"
+      )}>
         <div className="max-w-lg mx-auto">
-          <Button onClick={onBack} variant="ghost" size="sm" className="text-white hover:bg-white/10 p-0 h-auto mb-4">
+          <Button onClick={onBack} variant="ghost" size="sm" className="text-[var(--text-primary)] hover:bg-white/10 p-0 h-auto mb-4 border border-white/20 rounded-lg px-3 py-1">
             <ArrowLeft className="w-5 h-5 mr-2" /> Back to Journey
           </Button>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold">{task.title}</h1>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'Poppins, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>{task.title}</h1>
             <div className="flex items-center space-x-2">
-              <Badge variant={status === "done" ? "done" : status === "in_review" ? "in_review" : "todo"} className="bg-white/20 text-white">
+              <Badge variant={status === "done" ? "done" : status === "in_review" ? "in_review" : "todo"} className="bg-white/20 text-[var(--text-primary)] border-white/30">
                 {status.replace("_", " ")}
               </Badge>
-              <span className="text-primary-200">{task.points} points</span>
+              <span className="text-[var(--text-secondary)]">{task.points} points</span>
             </div>
           </div>
         </div>
@@ -147,10 +192,10 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
         <GoogleMapsLoader />
         {/* Map for all tasks except final message, s rôznymi miestami pre tasky 2 a 3 */}
         {task.title?.toLowerCase() !== "final message" && (
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
-              <CardTitle>Go to the place on the map</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[var(--text-primary)]">Go to the place on the map</CardTitle>
+              <CardDescription className="text-[var(--text-secondary)]">
                 {task.order === 2 || task.id === '2'
                   ? 'Celetná 597/13, 110 00 Staré Město, Česko'
                   : task.order === 3 || task.id === '3'
@@ -182,41 +227,39 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
                           ? { lat: 50.082381, lng: 14.413248 }
                           : task.order === 5 || task.id === '5'
                             ? { lat: 50.087027, lng: 14.417338 }
-                            : task.order === 6 || task.id === '6'
-                              ? { lat: 50.088989, lng: 14.415784 }
-                              : task.order === 7 || task.id === '7'
-                                ? { lat: 50.079452547414306, lng: 14.430391810571681 }
-                                : task.order === 8 || task.id === '8'
-                                  ? { lat: 50.09171152842647, lng: 14.417524515157798 }
-                                  : task.order === 9 || task.id === '9'
-                                    ? { lat: 50.086208690029736, lng: 14.414001196091295 }
-                                    : { lat: 50.087451, lng: 14.425519 }
+                          : task.order === 6 || task.id === '6'
+                            ? { lat: 50.088989, lng: 14.415784 }
+                            : task.order === 7 || task.id === '7'
+                              ? { lat: 50.079452547414306, lng: 14.430391810571681 }
+                              : task.order === 8 || task.id === '8'
+                                ? { lat: 50.09171152842647, lng: 14.417524515157798 }
+                                : task.order === 9 || task.id === '9'
+                                  ? { lat: 50.086208690029736, lng: 14.414001196091295 }
+                                  : { lat: 50.087451, lng: 14.425519 }
                   }
                   height="256px"
                 />
               </div>
             </CardContent>
           </Card>
-        )}
-
-        <Card>
+        )}        <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Task Description</CardTitle>
+            <CardTitle className="text-[var(--text-primary)]">Task Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-foreground leading-relaxed">{task.description}</p>
+            <p className="text-[var(--text-secondary)] leading-relaxed">{task.description}</p>
           </CardContent>
         </Card>
 
         {canSubmit && (
           validationType === "text:contains" || validationType === "text:equals" ? (
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle>Submit Your Answer</CardTitle>
-                <CardDescription>Type your answer below and check if it matches the task requirements.</CardDescription>
+                <CardTitle className="text-[var(--text-primary)]">Submit Your Answer</CardTitle>
+                <CardDescription className="text-[var(--text-secondary)]">Type your answer below and check if it matches the task requirements.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Input placeholder="Type your answer here" value={answer} onChange={(e) => setAnswer(e.target.value)} aria-label="Answer input" />
+                <Input placeholder="Type your answer here" value={answer} onChange={(e) => setAnswer(e.target.value)} aria-label="Answer input" className="bg-white/10 border-white/30 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
                 <div className="flex items-center space-x-2">
                   <Button onClick={async () => {
                     const val = answer.trim();
@@ -243,11 +286,11 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
                     } finally {
                       setCheckingAnswer(false);
                     }
-                  }} disabled={checkingAnswer}>
+                  }} disabled={checkingAnswer} className="bg-[var(--accent-color)] hover:bg-[var(--primary-color)] text-[var(--text-primary)]">
                     {checkingAnswer ? <LoadingSpinner size="sm" className="mr-2" /> : "Check Answer"}
                   </Button>
                   {answerCorrect && (
-                    <Button variant="ghost" onClick={() => onContinue()}>
+                    <Button variant="ghost" onClick={() => onContinue()} className="text-[var(--text-primary)] hover:bg-white/10">
                       Continue
                     </Button>
                   )}
@@ -255,19 +298,19 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle>Submit Your Work</CardTitle>
-                <CardDescription>Upload an image or video to complete this task</CardDescription>
+                <CardTitle className="text-[var(--text-primary)]">Submit Your Work</CardTitle>
+                <CardDescription className="text-[var(--text-secondary)]">Upload an image or video to complete this task</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleFileSelect} className="hidden" />
                   {!selectedFile ? (
-                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full h-24 border-2 border-dashed">
+                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full h-24 border-white/30 text-[var(--text-primary)] hover:bg-white/10">
                       <div className="text-center">
-                        <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Click to select file</p>
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-[var(--text-secondary)]" />
+                        <p className="text-sm text-[var(--text-secondary)]">Click to select file</p>
                       </div>
                     </Button>
                   ) : (
@@ -276,10 +319,10 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
                         {selectedFile.type.startsWith("image/") ? (
                           <img src={previewUrl || ""} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
                         ) : (
-                          <div className="w-full h-48 bg-muted rounded-xl flex items-center justify-center">
+                          <div className="w-full h-48 bg-white/10 rounded-xl flex items-center justify-center">
                             <div className="text-center">
-                              <Video className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                              <p className="text-sm text-muted-foreground">{selectedFile.name}</p>
+                              <Video className="w-12 h-12 mx-auto mb-2 text-[var(--text-secondary)]" />
+                              <p className="text-sm text-[var(--text-secondary)]">{selectedFile.name}</p>
                             </div>
                           </div>
                         )}
@@ -287,7 +330,7 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[var(--text-secondary)]">
                         <p>{selectedFile.name}</p>
                         <p>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                       </div>
@@ -295,11 +338,11 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
                   )}
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="caption" className="text-sm font-medium">Caption (Optional)</label>
-                  <Input id="caption" placeholder="Add a caption to describe your submission..." value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={200} />
-                  <p className="text-xs text-muted-foreground text-right">{caption.length}/200</p>
+                  <label htmlFor="caption" className="text-sm font-medium text-[var(--text-primary)]">Caption (Optional)</label>
+                  <Input id="caption" placeholder="Add a caption to describe your submission..." value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={200} className="bg-white/10 border-white/30 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
+                  <p className="text-xs text-[var(--text-secondary)] text-right">{caption.length}/200</p>
                 </div>
-                <Button onClick={handleSubmit} disabled={!selectedFile || createSubmissionMutation.isLoading || updateProgressMutation.isLoading} className="w-full">
+                <Button onClick={handleSubmit} disabled={!selectedFile || createSubmissionMutation.isLoading || updateProgressMutation.isLoading} className="w-full bg-[var(--accent-color)] hover:bg-[var(--primary-color)] text-[var(--text-primary)]">
                   {createSubmissionMutation.isLoading || updateProgressMutation.isLoading ? (
                     <>
                       <LoadingSpinner size="sm" className="mr-2" /> Submitting...
@@ -314,15 +357,15 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
         )}
 
         {justSubmitted && (
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="glass-card border-blue-300/50">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Camera className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-400/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Camera className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-blue-800 mb-2">Submission Successful!</h3>
-                <p className="text-sm text-blue-600 mb-4">Your submission has been sent for review. Ready for the next task?</p>
-                <Button onClick={() => { setJustSubmitted(false); onContinue(); }} className="w-full">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Submission Successful!</h3>
+                <p className="text-sm text-[var(--text-secondary)] mb-4">Your submission has been sent for review. Ready for the next task?</p>
+                <Button onClick={() => { setJustSubmitted(false); onContinue(); }} className="w-full bg-blue-500 hover:bg-blue-600 text-[var(--text-primary)]">
                   Continue to Next Task
                 </Button>
               </div>
@@ -331,33 +374,33 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
         )}
 
         {isCompleted && (
-          <Card className="bg-green-50 border-green-200">
+          <Card className="glass-card border-green-300/50">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Camera className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-green-400/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Camera className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-green-800 mb-2">Task Completed!</h3>
-                <p className="text-sm text-green-600">Congratulations! You&apos;ve earned {task.points} points for completing this task.</p>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2">Task Completed!</h3>
+                <p className="text-sm text-[var(--text-secondary)]">Congratulations! You&apos;ve earned {task.points} points for completing this task.</p>
               </div>
             </CardContent>
           </Card>
         )}
 
         {submissionsLoading ? (
-          <Card>
+          <Card className="glass-card">
             <CardContent className="flex items-center justify-center py-8">
               <LoadingSpinner />
             </CardContent>
           </Card>
         ) : submissions && submissions.length > 0 ? (
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
-              <CardTitle>Your Submissions</CardTitle>
+              <CardTitle className="text-[var(--text-primary)]">Your Submissions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {submissions.map((submission) => (
-                <div key={submission.id} className="border rounded-xl p-4">
+                <div key={submission.id} className="border border-white/20 rounded-xl p-4 bg-white/5">
                   <div className="flex items-start space-x-3">
                     <div className="flex-1">
                       {submission.downloadURL ? (
@@ -369,16 +412,16 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
                           </video>
                         )
                       ) : (
-                        <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center mb-2">
-                          <Eye className="w-8 h-8 text-muted-foreground" />
+                        <div className="w-full h-32 bg-white/10 rounded-lg flex items-center justify-center mb-2">
+                          <Eye className="w-8 h-8 text-[var(--text-secondary)]" />
                         </div>
                       )}
 
-                      {submission.caption && <p className="text-sm text-muted-foreground mb-2">{submission.caption}</p>}
+                      {submission.caption && <p className="text-sm text-[var(--text-secondary)] mb-2">{submission.caption}</p>}
 
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
                         <span>{submission.createdAt.toLocaleDateString()}</span>
-                        <Badge variant={submission.approved === true ? "done" : submission.approved === false ? "destructive" : "in_review"}>
+                        <Badge variant={submission.approved === true ? "done" : submission.approved === false ? "destructive" : "in_review"} className="bg-white/20 text-[var(--text-primary)] border-white/30">
                           {submission.approved === true ? "Approved" : submission.approved === false ? "Rejected" : "Pending"}
                         </Badge>
                       </div>
@@ -389,6 +432,7 @@ export function TaskDetail({ task, onBack, onContinue, status }: TaskDetailProps
             </CardContent>
           </Card>
         ) : null}
+      </div>
       </div>
     </div>
   );

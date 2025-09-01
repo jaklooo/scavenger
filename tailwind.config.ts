@@ -6,6 +6,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
@@ -21,6 +22,19 @@ const config: Config = {
           700: "#6E0B22",
           800: "#470715",
           900: "#210309",
+        },
+        // Custom theme colors
+        bg: {
+          light: '#ffffff',
+          dark: '#1a1a1a',
+        },
+        text: {
+          light: '#1a1a1a',
+          dark: '#ffffff',
+        },
+        surface: {
+          light: '#f8fafc',
+          dark: '#2a2a2a',
         },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

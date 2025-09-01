@@ -1,5 +1,6 @@
 "use client";
 
+import "../login-bg.css";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

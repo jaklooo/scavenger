@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { DashboardPage } from "@/components/dashboard-page";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import "../login-bg.css";
 
 export default function Dashboard() {
   const { user, userData, loading } = useAuth();
