@@ -54,25 +54,25 @@ export function LandingPage() {
       {/* Action Buttons & Forms */}
       <div className="w-full max-w-md mx-auto space-y-8">
         {activeForm === "none" && (
-          <Card className="border-2 bg-white/90 backdrop-blur-sm">
+          <Card className="border-2 bg-white/95 backdrop-blur-md shadow-2xl border-gray-200">
             <CardHeader className="text-center">
-              <CardTitle>Get Started</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-black text-2xl font-bold">Get Started</CardTitle>
+              <CardDescription className="text-gray-600 text-base">
                 Choose an option below to begin your scavenger hunt journey
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button 
+              <Button
                 onClick={() => setActiveForm("register")}
-                className="w-full h-12 text-base"
+                className="w-full h-12 text-base bg-[#BB133A] hover:bg-[#A01030] text-white font-semibold shadow-lg"
                 size="lg"
               >
                 Team Registration
               </Button>
-              <Button 
+              <Button
                 onClick={() => setActiveForm("login")}
                 variant="outline"
-                className="w-full h-12 text-base"
+                className="w-full h-12 text-base border-2 border-[#BB133A] text-[#BB133A] hover:bg-[#BB133A] hover:text-white font-semibold shadow-lg"
                 size="lg"
               >
                 Team Login
@@ -82,10 +82,10 @@ export function LandingPage() {
         )}
 
         {activeForm === "register" && (
-          <Card className="border-2 bg-white/90 backdrop-blur-sm">
+          <Card className="border-2 bg-white/95 backdrop-blur-md shadow-2xl border-gray-200">
             <CardHeader>
-              <CardTitle>Team Registration</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-black text-2xl font-bold">Team Registration</CardTitle>
+              <CardDescription className="text-gray-600 text-base">
                 Create a new team account to start participating
               </CardDescription>
             </CardHeader>
@@ -96,10 +96,10 @@ export function LandingPage() {
         )}
 
         {activeForm === "login" && (
-          <Card className="border-2 bg-white/90 backdrop-blur-sm">
+          <Card className="border-2 bg-white/95 backdrop-blur-md shadow-2xl border-gray-200">
             <CardHeader>
-              <CardTitle>Team Login</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-black text-2xl font-bold">Team Login</CardTitle>
+              <CardDescription className="text-gray-600 text-base">
                 Sign in to your existing team account
               </CardDescription>
             </CardHeader>
@@ -110,7 +110,11 @@ export function LandingPage() {
         )}
 
         {activeForm === "admin" && (
-          <AdminLoginForm onBack={() => setActiveForm("none")} />
+          <Card className="border-2 bg-white/95 backdrop-blur-md shadow-2xl border-gray-200">
+            <CardContent className="pt-6">
+              <AdminLoginForm onBack={() => setActiveForm("none")} />
+            </CardContent>
+          </Card>
         )}
 
 

@@ -179,9 +179,9 @@ export function JourneyPage() {
       <div className="max-w-lg mx-auto px-2 py-4">
         <div className="space-y-6">
           <div className="relative w-full h-7 flex items-center">
-            <div className="absolute left-0 top-0 w-full h-full rounded-full glass-card opacity-80" />
+            <div className="absolute left-0 top-0 w-full h-full rounded-full journey-glass-card opacity-80" />
             <div
-              className="transition-all duration-700 ease-in-out h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg"
+              className="transition-all duration-700 ease-in-out h-full rounded-full journey-progress-bar shadow-lg"
               style={{ width: `${totalTasks ? (completedTasks / totalTasks) * 100 : 0}%` }}
             />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--text-primary)] font-bold text-lg drop-shadow">
@@ -189,15 +189,15 @@ export function JourneyPage() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="glass-card rounded-xl p-4">
+            <div className="journey-stats-card rounded-xl p-4">
               <div className="text-2xl font-bold text-[var(--text-primary)]">{completedTasks}</div>
               <div className="text-sm text-[var(--text-secondary)]">Completed</div>
             </div>
-            <div className="glass-card rounded-xl p-4">
+            <div className="journey-stats-card rounded-xl p-4">
               <div className="text-2xl font-bold text-[var(--text-primary)]">{totalTasks}</div>
               <div className="text-sm text-[var(--text-secondary)]">Total Tasks</div>
             </div>
-            <div className="glass-card rounded-xl p-4">
+            <div className="journey-stats-card rounded-xl p-4">
               <div className="text-2xl font-bold text-[var(--text-primary)]">{earnedPoints}</div>
               <div className="text-sm text-[var(--text-secondary)]">Points</div>
             </div>
@@ -226,9 +226,9 @@ export function JourneyPage() {
                 key={task.id}
                 className={cn(
                   "cursor-pointer hover:shadow-lg transition-all duration-200 hover:shadow-xl group",
-                  status === "done" && "glass-card-done",
-                  status === "in_review" && "glass-card-review",
-                  status !== "done" && status !== "in_review" && "glass-card"
+                  status === "done" && "journey-glass-card-done",
+                  status === "in_review" && "journey-glass-card-review",
+                  status !== "done" && status !== "in_review" && "journey-glass-card"
                 )}
                 onClick={() => setSelectedTaskId(task.id)}
               >

@@ -65,24 +65,24 @@ export function AdminLoginForm({ onBack }: AdminLoginFormProps) {
         onClick={onBack}
         variant="ghost"
         size="sm"
-        className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
+        className="p-0 h-auto font-normal text-gray-600 hover:text-black hover:bg-gray-100"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to options
       </Button>
 
-      <Card className="p-6">
+      <Card className="p-6 border-2 border-gray-200 bg-white/95 backdrop-blur-md shadow-xl">
         <div className="space-y-4">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-[#BB133A]">Admin Login</h2>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-gray-600 mt-2">
               Enter admin credentials to access management features
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium text-foreground">
+              <label htmlFor="username" className="text-sm font-medium text-black">
                 Username
               </label>
               <Input
@@ -92,11 +92,12 @@ export function AdminLoginForm({ onBack }: AdminLoginFormProps) {
                 value={credentials.username}
                 onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                 required
+                className="border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A]"
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-foreground">
+              <label htmlFor="password" className="text-sm font-medium text-black">
                 Password
               </label>
               <Input
@@ -106,19 +107,20 @@ export function AdminLoginForm({ onBack }: AdminLoginFormProps) {
                 value={credentials.password}
                 onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                 required
+                className="border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A]"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-[#BB133A] hover:bg-[#9A0F2E] text-white"
+              className="w-full bg-[#BB133A] hover:bg-[#9A0F2E] text-white font-semibold"
               disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign In as Admin"}
             </Button>
           </form>
 
-          <div className="text-xs text-center text-muted-foreground">
+          <div className="text-xs text-center text-gray-500">
             🔒 Secure admin access for FSV UK Scavenger Hunt
           </div>
         </div>

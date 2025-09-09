@@ -27,62 +27,21 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
 
-  // Load theme from localStorage and Firestore
+  // Always use dark theme - no switching allowed
   useEffect(() => {
-    const loadTheme = async () => {
-      let selectedTheme: Theme = 'light';
-
-      // First, try localStorage (immediate)
-      const localTheme = localStorage.getItem('theme') as Theme;
-      if (localTheme && (localTheme === 'light' || localTheme === 'dark')) {
-        selectedTheme = localTheme;
-      }
-
-      // If user is logged in, try to get theme from Firestore
-      if (user?.uid) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          const firestoreTheme = userDoc.data()?.theme as Theme;
-          if (firestoreTheme && (firestoreTheme === 'light' || firestoreTheme === 'dark')) {
-            // Firestore has priority if user is logged in and has a theme set
-            selectedTheme = firestoreTheme;
-            // Update localStorage to match
-            localStorage.setItem('theme', firestoreTheme);
-          } else if (localTheme) {
-            // If Firestore doesn't have theme but localStorage does, save to Firestore
-            await updateDoc(doc(db, 'users', user.uid), { theme: localTheme });
-          }
-        } catch (error) {
-          console.warn('Failed to load theme from Firestore:', error);
-        }
-      }
-
-      // Apply the selected theme
-      setTheme(selectedTheme);
-      document.documentElement.classList.toggle('dark', selectedTheme === 'dark');
-      setMounted(true);
-    };
-
-    loadTheme();
-  }, [user?.uid]);
+    // Force dark theme
+    setTheme('dark');
+    document.documentElement.classList.add('dark');
+    setMounted(true);
+  }, []);
 
   const handleSetTheme = async (newTheme: Theme) => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-
-    // Save to Firestore if user is logged in
-    if (user?.uid) {
-      try {
-        await updateDoc(doc(db, 'users', user.uid), { theme: newTheme });
-      } catch (error) {
-        console.warn('Failed to save theme to Firestore:', error);
-      }
-    }
+    // Do nothing - theme switching disabled
+    console.warn('Theme switching is disabled - only dark theme is allowed');
   };
 
   // Prevent hydration mismatch by not rendering until mounted

@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BottomNavigation } from "@/components/bottom-navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { getTeam, updateTeam } from "@/services/teams";
 import { uploadFile } from "../../services/storage";
@@ -206,13 +205,6 @@ export default function ProfilePage() {
               <p className="text-xs text-[var(--text-secondary)] text-right mt-1">
                 {description.length}/500
               </p>
-            </div>
-            {/* Theme Settings */}
-            <div className="w-full mt-4 pt-4 border-t border-white/20">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">Theme</div>
-                <ThemeToggle />
-              </div>
             </div>
             {/* Save Button */}
             <Button

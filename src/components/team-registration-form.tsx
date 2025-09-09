@@ -122,7 +122,7 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
     return (
       <form onSubmit={handleTeamNameSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label htmlFor="teamName" className="font-medium">Team Name</label>
+          <label htmlFor="teamName" className="font-medium text-black">Team Name</label>
           <Input
             id="teamName"
             type="text"
@@ -131,13 +131,14 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
             onChange={e => setTeamName(e.target.value)}
             maxLength={50}
             disabled={isLoading}
+            className="border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A]"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-500">
             <span className="text-red-500 font-semibold">Warning:</span> This team name cannot be changed later.
           </p>
           {teamNameError && <p className="text-red-500 text-xs mt-1">{teamNameError}</p>}
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className="w-full bg-[#BB133A] hover:bg-[#A01030] text-white font-semibold" disabled={isLoading}>
           {isLoading ? "Saving..." : "Set Team Name"}
         </Button>
       </form>
@@ -156,6 +157,7 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
             onChange={handleInputChange("email")}
             autoComplete="email"
             disabled={isLoading}
+            className="border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A]"
           />
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
 
@@ -167,29 +169,30 @@ export function TeamRegistrationForm({ onBack }: TeamRegistrationFormProps) {
             onChange={handleInputChange("password")}
             autoComplete="new-password"
             disabled={isLoading}
+            className="border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A]"
           />
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className="w-full bg-[#BB133A] hover:bg-[#A01030] text-white font-semibold" disabled={isLoading}>
           {isLoading ? "Registering..." : "Register"}
         </Button>
-        <Button type="button" variant="ghost" className="w-full mt-2" onClick={onBack}>
+        <Button type="button" variant="ghost" className="w-full mt-2 text-gray-600 hover:text-black hover:bg-gray-100" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
       </form>
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
+          <span className="w-full border-t border-gray-300" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
+          <span className="bg-white px-2 text-gray-500">Or</span>
         </div>
       </div>
       <Button
         type="button"
         variant="outline"
-        className="w-full"
+        className="w-full border-2 border-gray-300 text-black hover:bg-gray-50 bg-white"
         onClick={handleGoogleSignUp}
         disabled={isLoading}
       >

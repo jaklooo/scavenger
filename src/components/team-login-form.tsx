@@ -84,7 +84,7 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
         onClick={onBack}
         variant="ghost"
         size="sm"
-        className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
+        className="p-0 h-auto font-normal text-gray-600 hover:text-black hover:bg-gray-100"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to options
@@ -92,7 +92,7 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
+          <label htmlFor="email" className="text-sm font-medium text-black">
             Email Address
           </label>
           <Input
@@ -101,7 +101,7 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
             placeholder="Enter your email"
             value={formData.email}
             onChange={handleInputChange("email")}
-            className={errors.email ? "border-red-500" : ""}
+            className={`border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A] ${errors.email ? "border-red-500" : ""}`}
             aria-describedby={errors.email ? "email-error" : undefined}
           />
           {errors.email && (
@@ -112,7 +112,7 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-foreground">
+          <label htmlFor="password" className="text-sm font-medium text-black">
             Password
           </label>
           <Input
@@ -121,7 +121,7 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
             placeholder="Enter your password"
             value={formData.password}
             onChange={handleInputChange("password")}
-            className={errors.password ? "border-red-500" : ""}
+            className={`border-gray-300 focus:border-[#BB133A] focus:ring-[#BB133A] ${errors.password ? "border-red-500" : ""}`}
             aria-describedby={errors.password ? "password-error" : undefined}
           />
           {errors.password && (
@@ -131,9 +131,9 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
           )}
         </div>
 
-        <Button 
-          type="submit" 
-          className="w-full" 
+        <Button
+          type="submit"
+          className="w-full bg-[#BB133A] hover:bg-[#A01030] text-white font-semibold"
           disabled={isLoading}
           size="lg"
         >
@@ -143,17 +143,17 @@ export function TeamLoginForm({ onBack }: TeamLoginFormProps) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
+          <span className="w-full border-t border-gray-300" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
+          <span className="bg-white px-2 text-gray-500">Or</span>
         </div>
       </div>
 
       <Button
         onClick={handleGoogleSignIn}
         variant="outline"
-        className="w-full"
+        className="w-full border-2 border-gray-300 text-black hover:bg-gray-50 bg-white"
         disabled={isLoading}
         size="lg"
       >

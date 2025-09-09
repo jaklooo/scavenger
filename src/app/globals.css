@@ -3,46 +3,48 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
-  --destructive: 0 84.2% 60.2%;
+  /* Default to dark theme variables */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
   --radius: 0.5rem;
 
-  /* Custom theme variables for light theme */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --text-primary: #000000;
-  --text-secondary: #333333;
-  --glass-bg: rgba(139, 69, 19, 0.15); /* SaddleBrown - tmavšie drevo */
-  --glass-border: rgba(160, 82, 45, 0.25); /* Sienna - stredne drevo */
-  --glass-bg-done: rgba(34, 197, 94, 0.2);
+  /* Custom theme variables - always dark theme */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --glass-bg: rgba(187, 19, 58, 0.2); /* #BB133A červená */
+  --glass-border: rgba(187, 19, 58, 0.3);
+  --glass-bg-done: rgba(34, 197, 94, 0.25);
   --glass-border-done: rgba(74, 222, 128, 0.4);
-  --glass-bg-review: rgba(245, 158, 11, 0.2);
+  --glass-bg-review: rgba(245, 158, 11, 0.25);
   --glass-border-review: rgba(251, 191, 36, 0.4);
-  --accent-color: #8B4513; /* SaddleBrown pre accent prvky v light */
-  --primary-color: #A0522D; /* Sienna pre hlavné prvky v light */
-  --secondary-color: #CD853F; /* Peru pre secondary prvky v light */
-  --glow-color: rgba(139, 69, 19, 0.4); /* Glow pre light mód */
-  --dashboard-bg: url('/light_bg.png') center center/cover no-repeat fixed;
+  --accent-color: #BB133A; /* Červená pre accent prvky */
+  --primary-color: #A01030; /* Tmavšia červená pre hlavné prvky */
+  --secondary-color: #D94570; /* Svetlejšia červená pre secondary prvky */
+  --glow-color: rgba(187, 19, 58, 0.4); /* Červený glow efekt */
+  --dashboard-bg: url('/bg1.jpg') center center/cover no-repeat fixed;
   --login-bg: url('/prague-castle-bg.jpg') bottom center/contain no-repeat fixed;
 }
 
+/* Dark theme class kept for compatibility - but values are same as root */
 .dark {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
@@ -64,21 +66,21 @@
   --input: 217.2 32.6% 17.5%;
   --ring: 212.7 26.8% 83.9%;
 
-  /* Custom theme variables for dark theme */
+  /* Same custom variables as root - always dark */
   --bg-primary: #1a1a1a;
   --bg-secondary: #2a2a2a;
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
-  --glass-bg: rgba(59, 130, 246, 0.2);
-  --glass-border: rgba(147, 197, 253, 0.3);
+  --glass-bg: rgba(187, 19, 58, 0.2);
+  --glass-border: rgba(187, 19, 58, 0.3);
   --glass-bg-done: rgba(34, 197, 94, 0.25);
   --glass-border-done: rgba(74, 222, 128, 0.4);
   --glass-bg-review: rgba(245, 158, 11, 0.25);
   --glass-border-review: rgba(251, 191, 36, 0.4);
-  --accent-color: #3B82F6; /* Blue-500 pre accent prvky v dark */
-  --primary-color: #1D4ED8; /* Blue-700 pre hlavné prvky v dark */
-  --secondary-color: #60A5FA; /* Blue-400 pre secondary prvky v dark */
-  --glow-color: rgba(59, 130, 246, 0.4); /* Glow pre dark mód */
+  --accent-color: #BB133A;
+  --primary-color: #A01030;
+  --secondary-color: #D94570;
+  --glow-color: rgba(187, 19, 58, 0.4);
   --dashboard-bg: url('/bg1.jpg') center center/cover no-repeat fixed;
   --login-bg: url('/prague-castle-bg.jpg') bottom center/contain no-repeat fixed;
 }
@@ -90,4 +92,39 @@
 body {
   color: hsl(var(--foreground));
   background: hsl(var(--background));
+}
+
+/* Special blue theme classes for Journey page only */
+.journey-glass-card {
+  background: rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(147, 197, 253, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+.journey-glass-card-done {
+  background: rgba(34, 197, 94, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+  color: var(--text-primary);
+}
+
+.journey-glass-card-review {
+  background: rgba(245, 158, 11, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.15);
+  color: var(--text-primary);
+}
+
+.journey-progress-bar {
+  background: linear-gradient(to right, #3B82F6, #60A5FA);
+}
+
+.journey-stats-card {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(147, 197, 253, 0.3);
+  backdrop-filter: blur(16px);
 }
