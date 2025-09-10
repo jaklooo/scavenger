@@ -23,7 +23,8 @@ export function GalleryPage() {
     );
   }
 
-  const approvedSubmissions = submissions?.filter(s => s.approved === true) || [];
+  // Show all submissions from team, regardless of approval status
+  const allSubmissions = submissions || [];
 
   return (
     <div className="min-h-screen bg-background pb-24 font-['Inter','Poppins',sans-serif] relative">
@@ -39,25 +40,25 @@ export function GalleryPage() {
             Our Gallery
           </div>
           <div className="text-[var(--text-secondary)] text-lg font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {approvedSubmissions.length} approved submissions
+            {allSubmissions.length} team submissions
           </div>
         </div>
       </div>
 
   <div className="max-w-lg mx-auto px-2 py-4">
-        {approvedSubmissions.length === 0 ? (
+        {allSubmissions.length === 0 ? (
           <Card className="glass-card">
             <CardContent className="text-center py-12">
               <Camera className="w-16 h-16 mx-auto text-[var(--text-secondary)] mb-4" />
               <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)]">No media yet</h3>
               <p className="text-[var(--text-secondary)] mb-4">
-                Complete tasks and get submissions approved to see them here.
+                Complete tasks and upload photos to see them here.
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            {approvedSubmissions.map((submission, idx) => (
+            {allSubmissions.map((submission, idx) => (
               <div
                 key={submission.id}
                 className="aspect-square relative cursor-pointer group"
@@ -117,18 +118,18 @@ export function GalleryPage() {
       </div>
 
       {/* Media Modal */}
-      {selectedIndex !== null && approvedSubmissions[selectedIndex] && (
+      {selectedIndex !== null && allSubmissions[selectedIndex] && (
         <MediaModal
           media={{
-            ...approvedSubmissions[selectedIndex],
-            id: approvedSubmissions[selectedIndex].id ?? "",
-            downloadUrl: approvedSubmissions[selectedIndex].downloadURL
+            ...allSubmissions[selectedIndex],
+            id: allSubmissions[selectedIndex].id ?? "",
+            downloadUrl: allSubmissions[selectedIndex].downloadURL
           }}
           onClose={() => setSelectedIndex(null)}
           onPrev={() => setSelectedIndex(i => (i !== null && i > 0 ? i - 1 : i))}
-          onNext={() => setSelectedIndex(i => (i !== null && i < approvedSubmissions.length - 1 ? i + 1 : i))}
+          onNext={() => setSelectedIndex(i => (i !== null && i < allSubmissions.length - 1 ? i + 1 : i))}
           hasPrev={selectedIndex > 0}
-          hasNext={selectedIndex < approvedSubmissions.length - 1}
+          hasNext={selectedIndex < allSubmissions.length - 1}
         />
       )}
 

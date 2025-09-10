@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
-    "admin-seed": "tsx scripts/admin-seed.ts"
+    "admin-seed": "tsx scripts/admin-seed.ts",
+    "fresh-start": "tsx scripts/fresh-start-seed.ts",
+    "simple-fresh": "tsx scripts/simple-fresh-start.ts"
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",

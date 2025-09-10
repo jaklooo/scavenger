@@ -41,6 +41,7 @@ export type Task = z.infer<typeof TaskSchema>;
 // Progress schemas
 export const ProgressSchema = z.object({
   status: z.enum(["todo", "in_review", "done"]).default("todo"),
+  points: z.number().min(0).optional(), // Actual points earned by team
   updatedAt: z.date(),
 });
 

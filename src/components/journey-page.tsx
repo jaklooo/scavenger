@@ -8,6 +8,15 @@ import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TaskDetail } from "@/components/task-detail";
+import { Task1Workflow } from "@/components/task1-workflow";
+import { Task2Workflow } from "@/components/task2-workflow";
+import { Task3Workflow } from "@/components/task3-workflow";
+import { Task4Workflow } from "@/components/task4-workflow";
+import { Task5Workflow } from "@/components/task5-workflow";
+import { Task6Workflow } from "@/components/task6-workflow";
+import { Task7Workflow } from "@/components/task7-workflow";
+import { Task8Workflow } from "@/components/task8-workflow";
+import { Task9Workflow } from "@/components/task9-workflow";
 import { useTasks, useTeamProgress } from "@/hooks/use-tasks";
 import { useAuth } from "@/hooks/use-auth";
 import { updateTeam } from "@/services/teams";
@@ -32,17 +41,30 @@ export function JourneyPage() {
     );
   }
 
-  // Calculate progress statistics
-  const completedTasks = progress?.filter(p => p.status === "done").length || 0;
+  // Calculate progress statistics - považuj "in_review" tiež za dokončené, ale max totalTasks
   const totalTasks = tasks?.length || 0;
+  const rawCompletedTasks = progress?.filter(p => p.status === "done" || p.status === "in_review").length || 0;
+  const completedTasks = Math.min(rawCompletedTasks, totalTasks);
   const totalPoints = tasks?.reduce((sum, task) => sum + task.points, 0) || 0;
-  const earnedPoints = tasks?.reduce((sum, task) => {
-    const taskProgress = progress?.find(p => p.taskId === task.id);
-    return sum + (taskProgress?.status === "done" ? task.points : 0);
+  const earnedPoints = progress?.reduce((sum, taskProgress) => {
+    // Use actual earned points from progress, fall back to task points for "done" status
+    if (taskProgress.status === "done") {
+      return sum + (taskProgress.points ?? 0); // Use actual earned points
+    }
+    return sum;
   }, 0) || 0;
+
+  // Nájdi tasky v in_review stave (čakajúce na admin hodnotenie)
+  const tasksInReview = progress?.filter(p => p.status === "in_review") || [];
 
   const getTaskStatus = (taskId: string) => {
     return progress?.find(p => p.taskId === taskId)?.status || "todo";
+  };
+
+  // Pomocná funkcia na určenie či je task skutočne dokončený (vrátane in_review)
+  const isTaskCompleted = (taskId: string) => {
+    const status = getTaskStatus(taskId);
+    return status === "done" || status === "in_review";
   };
 
   const getTaskBadgeVariant = (status: string) => {
@@ -63,13 +85,17 @@ export function JourneyPage() {
 
   const handleContinueToNext = () => {
     if (!tasks || !selectedTaskId) return;
-    const currentIndex = tasks.findIndex(t => t.id === selectedTaskId);
-    if (currentIndex === -1) return;
-    const nextIndex = currentIndex + 1;
-    if (nextIndex < tasks.length) {
-      setSelectedTaskId(tasks[nextIndex].id);
+    
+    // Nájdi ďalší nedokončený task (nepovoľuj in_review/submitted ako nedokončené)
+    const nextTask = tasks.find(task => {
+      return !isTaskCompleted(task.id);
+    });
+    
+    if (nextTask) {
+      // Presmeruj na ďalší nedokončený task
+      setSelectedTaskId(nextTask.id);
     } else {
-      // All tasks completed, go back to journey overview
+      // Všetky tasky sú dokončené, vráť sa na journey overview s congratulations
       setSelectedTaskId(null);
     }
   };
@@ -121,13 +147,81 @@ export function JourneyPage() {
     // }
 
     return (
-      <TaskDetail 
-        task={task} 
-        onBack={() => setSelectedTaskId(null)}
-        onContinue={handleContinueToNext}
-        status={getTaskStatus(selectedTaskId)}
-        isFirstTask={task?.order === 1 || task?.title?.toLowerCase().includes('task 1') || taskIndex === 0}
-      />
+      <>
+        {/* Check if this is Task 1 and use special workflow */}
+        {(task?.order === 1 || task?.title?.toLowerCase().includes('task 1') || taskIndex === 0) ? (
+          <Task1Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 2 || task?.title?.toLowerCase().includes('task 2') || taskIndex === 1) ? (
+          <Task2Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 3 || task?.title?.toLowerCase().includes('task 3') || taskIndex === 2) ? (
+          <Task3Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 4 || task?.title?.toLowerCase().includes('task 4') || taskIndex === 3) ? (
+          <Task4Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 5 || task?.title?.toLowerCase().includes('task 5') || taskIndex === 4) ? (
+          <Task5Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 6 || task?.title?.toLowerCase().includes('task 6') || taskIndex === 5) ? (
+          <Task6Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 7 || task?.title?.toLowerCase().includes('task 7') || taskIndex === 6) ? (
+          <Task7Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 8 || task?.title?.toLowerCase().includes('task 8') || taskIndex === 7) ? (
+          <Task8Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (task?.order === 9 || task?.title?.toLowerCase().includes('task 9') || taskIndex === 8) ? (
+          <Task9Workflow 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+          />
+        ) : (
+          <TaskDetail 
+            task={task} 
+            onBack={() => setSelectedTaskId(null)}
+            onContinue={handleContinueToNext}
+            status={getTaskStatus(selectedTaskId)}
+            isFirstTask={false}
+          />
+        )}
+      </>
     );
   }
 
@@ -167,10 +261,34 @@ export function JourneyPage() {
       <div className="w-full flex justify-center px-2 pt-8">
         <div className="w-full max-w-lg text-center">
           <div className="text-3xl md:text-4xl font-extrabold text-[var(--text-primary)] leading-tight mb-2" style={{ fontFamily: 'Poppins, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-            Our Journey
+            {(() => {
+              const currentTask = tasks?.find(task => {
+                return !isTaskCompleted(task.id);
+              });
+              
+              if (!currentTask && completedTasks > 0) {
+                return "Journey Complete!";
+              } else if (currentTask) {
+                return "Current Task";
+              } else {
+                return "Our Journey";
+              }
+            })()}
           </div>
           <div className="text-[var(--text-secondary)] text-lg font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Track your progress and complete tasks!
+            {(() => {
+              const currentTask = tasks?.find(task => {
+                return !isTaskCompleted(task.id);
+              });
+              
+              if (!currentTask && completedTasks > 0) {
+                return "All tasks completed successfully!";
+              } else if (currentTask) {
+                return "Complete this task to unlock the next one";
+              } else {
+                return "Track your progress and complete tasks!";
+              }
+            })()}
           </div>
         </div>
       </div>
@@ -182,10 +300,10 @@ export function JourneyPage() {
             <div className="absolute left-0 top-0 w-full h-full rounded-full journey-glass-card opacity-80" />
             <div
               className="transition-all duration-700 ease-in-out h-full rounded-full journey-progress-bar shadow-lg"
-              style={{ width: `${totalTasks ? (completedTasks / totalTasks) * 100 : 0}%` }}
+              style={{ width: `${totalTasks ? Math.min(100, (completedTasks / totalTasks) * 100) : 0}%` }}
             />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--text-primary)] font-bold text-lg drop-shadow">
-              {totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0}%
+              {totalTasks ? Math.min(100, Math.round((completedTasks / totalTasks) * 100)) : 0}%
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
@@ -206,66 +324,124 @@ export function JourneyPage() {
       </div>
 
 
-      {/* Tasks List - zobraz všetky tasky pre testovanie */}
+      {/* Tasks List - zobraz len aktuálny nedokončený task */}
       <div className="max-w-lg mx-auto px-2 py-4 space-y-4">
-        {tasks?.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Trophy className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                No tasks available at the moment.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          tasks?.map((task, idx) => {
-            const status = getTaskStatus(task.id);
-            const Icon = getTaskIcon(status);
+        {(() => {
+          // Ak nie sú žiadne tasky
+          if (!tasks?.length) {
             return (
-              <Card
-                key={task.id}
-                className={cn(
-                  "cursor-pointer hover:shadow-lg transition-all duration-200 hover:shadow-xl group",
-                  status === "done" && "journey-glass-card-done",
-                  status === "in_review" && "journey-glass-card-review",
-                  status !== "done" && status !== "in_review" && "journey-glass-card"
-                )}
-                onClick={() => setSelectedTaskId(task.id)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                        {idx + 1}
+              <Card>
+                <CardContent className="text-center py-8">
+                  <Trophy className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    No tasks available at the moment.
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          // Nájdi prvý nedokončený task (používaj novú logiku)
+          const currentTask = tasks.find(task => {
+            return !isTaskCompleted(task.id);
+          });
+
+          // Ak sú všetky tasky dokončené - zobraz congratulations
+          if (!currentTask) {
+            return (
+              <>
+                <Card className="journey-glass-card-done">
+                  <CardContent className="text-center py-12">
+                    <Trophy className="w-16 h-16 mx-auto text-yellow-400 mb-6" />
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-4">
+                      🎉 Congratulations!
+                    </h2>
+                    <p className="text-[var(--text-primary)] text-lg mb-4">
+                      You passed all the tasks!
+                    </p>
+                    <div className="flex justify-center space-x-6 mt-6">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-[var(--text-primary)]">{totalTasks}</div>
+                        <div className="text-sm text-[var(--text-secondary)]">Tasks Completed</div>
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg leading-tight text-[var(--text-primary)]">
-                          {task.title}
-                        </CardTitle>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant={getTaskBadgeVariant(status)} className="bg-white/20 text-[var(--text-primary)] border-white/30">
-                            <Icon className="w-3 h-3 mr-1" />
-                            {status.replace("_", " ")}
-                          </Badge>
-                          <span className="text-sm text-[var(--text-secondary)]">
-                            {task.points} pts
-                          </span>
-                        </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-[var(--text-primary)]">{earnedPoints}</div>
+                        <div className="text-sm text-[var(--text-secondary)]">Points Earned</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Oranžová karta pre pending admin review */}
+                {tasksInReview.length > 0 && (
+                  <Card className="journey-glass-card-review mt-4">
+                    <CardContent className="text-center py-8">
+                      <Clock className="w-12 h-12 mx-auto text-orange-400 mb-4" />
+                      <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">
+                        ⏳ Pending Admin Review
+                      </h3>
+                      <p className="text-[var(--text-primary)] text-sm mb-3">
+                        {tasksInReview.length} task{tasksInReview.length > 1 ? 's' : ''} awaiting admin evaluation.
+                      </p>
+                      <p className="text-[var(--text-secondary)] text-xs">
+                        Points will be added once admin completes the review.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            );
+          }
+
+          // Zobraz len aktuálny nedokončený task
+          const taskIndex = tasks.findIndex(t => t.id === currentTask.id);
+          const status = getTaskStatus(currentTask.id);
+          const Icon = getTaskIcon(status);
+
+          return (
+            <Card
+              key={currentTask.id}
+              className={cn(
+                "cursor-pointer hover:shadow-lg transition-all duration-200 hover:shadow-xl group",
+                status === "done" && "journey-glass-card-done",
+                status === "in_review" && "journey-glass-card-review",
+                status !== "done" && status !== "in_review" && "journey-glass-card"
+              )}
+              onClick={() => setSelectedTaskId(currentTask.id)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                      {taskIndex + 1}
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg leading-tight text-[var(--text-primary)]">
+                        {currentTask.title}
+                      </CardTitle>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant={getTaskBadgeVariant(status)} className="bg-white/20 text-[var(--text-primary)] border-white/30">
+                          <Icon className="w-3 h-3 mr-1" />
+                          {status.replace("_", " ")}
+                        </Badge>
+                        <span className="text-sm text-[var(--text-secondary)]">
+                          {currentTask.points} pts
+                        </span>
                       </div>
                     </div>
                   </div>
-                </CardHeader>
-                {task.description && (
-                  <CardContent className="pt-0">
-                    <CardDescription className="text-[var(--text-secondary)]">
-                      {task.description}
-                    </CardDescription>
-                  </CardContent>
-                )}
-              </Card>
-            );
-          })
-        )}
+                </div>
+              </CardHeader>
+              {currentTask.description && (
+                <CardContent className="pt-0">
+                  <CardDescription className="text-[var(--text-secondary)]">
+                    {currentTask.description}
+                  </CardDescription>
+                </CardContent>
+              )}
+            </Card>
+          );
+        })()}
       </div>
 
       </div>

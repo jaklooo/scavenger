@@ -190,9 +190,8 @@ export function TaskDetail({ task, onBack, onContinue, status, isFirstTask = fal
       <div className="max-w-lg mx-auto p-6 space-y-6">
         {/* Google Maps Loader for InteractiveMap */}
         <GoogleMapsLoader />
-        {/* Map for all tasks except final message, s rôznymi miestami pre tasky 2 a 3 */}
-        {task.title?.toLowerCase() !== "final message" && (
-          <Card className="glass-card">
+        {/* Map for all tasks */}
+        <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-[var(--text-primary)]">Go to the place on the map</CardTitle>
               <CardDescription className="text-[var(--text-secondary)]">
@@ -242,7 +241,8 @@ export function TaskDetail({ task, onBack, onContinue, status, isFirstTask = fal
               </div>
             </CardContent>
           </Card>
-        )}        <Card className="glass-card">
+        
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-[var(--text-primary)]">Task Description</CardTitle>
           </CardHeader>

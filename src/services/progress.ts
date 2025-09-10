@@ -55,13 +55,21 @@ export async function getTeamProgress(teamId: string): Promise<Array<Progress & 
 export async function updateTaskProgress(
   teamId: string, 
   taskId: string, 
-  status: Progress["status"]
+  status: Progress["status"],
+  points?: number
 ): Promise<void> {
   try {
-    await setDoc(doc(db, "progress", teamId, "tasks", taskId), {
+    const progressData: any = {
       status,
       updatedAt: Timestamp.now(),
-    });
+    };
+    
+    // Add points if provided
+    if (points !== undefined) {
+      progressData.points = points;
+    }
+    
+    await setDoc(doc(db, "progress", teamId, "tasks", taskId), progressData);
   } catch (error) {
     console.error("Error updating task progress:", error);
     throw new Error("Failed to update task progress");

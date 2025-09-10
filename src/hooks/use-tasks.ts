@@ -40,16 +40,24 @@ export function useUpdateTaskProgress() {
   const queryClient = useQueryClient();
 
   return useMutation(
-    async ({ taskId, status }: { taskId: string; status: Progress["status"] }) => {
+    async ({ taskId, status, points }: { 
+      taskId: string; 
+      status: Progress["status"]; 
+      points?: number;
+    }) => {
       if (!userData?.teamId) {
         throw new Error("No team ID");
       }
-      await updateTaskProgress(userData.teamId, taskId, status);
+      await updateTaskProgress(userData.teamId, taskId, status, points);
     },
     {
-      onSuccess: () => {
+      onSuccess: (_, { points }) => {
         queryClient.invalidateQueries(["progress", userData?.teamId]);
-        toast.success("Task status updated!");
+        if (points !== undefined) {
+          toast.success(`Task completed! You earned ${points} points!`);
+        } else {
+          toast.success("Task status updated!");
+        }
       },
       onError: (error: any) => {
         toast.error(error.message || "Failed to update task status");
